@@ -5,6 +5,7 @@
 <p align="center">
 	<img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat">
 	<img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat">
+	<img src="https://badge.fury.io/js/insane-mc.svg">
 	<img src="https://tokei.rs/b1/github/insane-mc/imc">
 	<img src="https://hits.dwyl.com/insane-mc/imc.svg?style=flat">
 </p>
