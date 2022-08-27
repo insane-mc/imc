@@ -13,10 +13,27 @@ export interface ItemMeta extends ElementMeta {
 
 
 export class Item extends Element {
+	data: ItemNBT
 	count: number
 	slot: number
 
-	commandGive(target, count?: number) {
+	static toDisplayName(id: string) {
+		let vanilla = false
+		if (!id.includes(':')) { vanilla = true }
+		else if (id.startsWith('minecraft:')) {
+			vanilla = true
+			id = id.slice(10)
+		}
+		if (vanilla) {
+			return id.split('_').map(word => {
+				return word[0].toUpperCase() + word.slice(1).toLowerCase()
+			}).join(' ')
+		} else {
+			return id
+		}
+	}
+
+	commandGive(target: string = '@s', count?: number) {
 		count = count || this.count
 		return `give ${target} ${this.id}${JSON.stringify(this.data)} ${count !== 1 ? count : ''}`.trim()
 	}

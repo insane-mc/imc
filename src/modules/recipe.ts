@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash'
+import { cloneDeep, isEmpty } from 'lodash'
 
 import { Item } from './item'
 import { Event } from './event'
@@ -43,19 +43,18 @@ export interface RecipeMeta extends ElementMeta {
 }
 
 
-const RecipePatternString = [
-	['&', 'U', '%'],
-	['L', 'O', 'R'],
-	['#', 'D', '$'],
-]
+const RecipePatternString = ['O', 'X', '#', '$', '=', '&', '%', '*', 'U']
 
 
 export class Recipe extends Element {
 	data: RecipeData
 	displayName: string
 
+	result?: Item
+
 	private craftedEvent?: Event
 	private craftedAdvancement?: Advancement
+
 
 	private static fromMaterialMeta(meta: RecipeMaterialMeta): RecipeMaterial {
 		if (typeof meta === 'string') {
@@ -66,6 +65,14 @@ export class Recipe extends Element {
 			return { item: meta.name }
 		}
 		return meta
+	}
+
+	static stringifyMaterial(item: RecipeMaterial): string {
+		if ((item as any).item) {
+			return (item as any).item
+		} else {
+			return '#' + (item as any).tag
+		}
 	}
 
 
@@ -125,13 +132,21 @@ export class Recipe extends Element {
 			if (meta.recipe) {
 				this.data.key = {}
 				this.data.pattern = []
+
+				let count = 0
+				let cache = {}
+
 				for (let i = 0; i < meta.recipe.length; i++) {
 					let pattern = ''
 					for (let j = 0; j < meta.recipe[i].length; j++) {
 						if (meta.recipe[i][j]) {
-							const key = RecipePatternString[i][j]
-							this.data.key[key] = Recipe.fromMaterialMeta(meta.recipe[i][j])
-							pattern += key
+							const material = Recipe.fromMaterialMeta(meta.recipe[i][j])
+							const id = Recipe.stringifyMaterial(material)
+							if (!cache[id]) {
+								cache[id] = RecipePatternString[count++]
+								this.data.key[cache[id]] = material
+							}
+							pattern += cache[id]
 						} else {
 							pattern += ' '
 						}
@@ -153,10 +168,12 @@ export class Recipe extends Element {
 					}
 
 					this.data.result = { item: 'minecraft:knowledge_book' }
+					this.result = cloneDeep(meta.result)
+					this.result.count = meta.resultCount || 1
 
 					this.on('crafted').trigger([
 						'clear @s minecraft:knowledge_book',
-						meta.result.commandGive('@s'),
+						this.result.commandGive('@s'),
 					].join('\n'))
 				}
 			}

@@ -78,6 +78,31 @@ md5@^2.3.0:
     crypt "0.0.2"
     is-buffer "~1.1.6"
 
+ramda-fantasy@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.npmmirror.com/ramda-fantasy/-/ramda-fantasy-0.8.0.tgz#9e8c37d93ec0a70796cfc10873dd9c50850390f6"
+  integrity sha512-ZA1LVjy2wfCrlAsTJghBc9OxB4U14KTReDzuKJPeQ8aeWm+mRFw+8O0aUD4bibOKHzj5it/GkQcXVbzXmjFcpg==
+  dependencies:
+    ramda ">=0.15.0"
+
+ramda@>=0.15.0:
+  version "0.28.0"
+  resolved "https://registry.npmmirror.com/ramda/-/ramda-0.28.0.tgz#acd785690100337e8b063cab3470019be427cc97"
+  integrity sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==
+
+ramda@^0.27.2:
+  version "0.27.2"
+  resolved "https://registry.npmmirror.com/ramda/-/ramda-0.27.2.tgz#84463226f7f36dc33592f6f4ed6374c48306c3f1"
+  integrity sha512-SbiLPU40JuJniHexQSAgad32hfwd+DRUdwF2PlVuI5RZD0/vahUco7R8vD86J/tcEKKF9vZrUVwgtmGCqlCKyA==
+
+roman-numbers@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmmirror.com/roman-numbers/-/roman-numbers-1.0.2.tgz#54ba39c91247b1a5cc013e7b3677be97207284d3"
+  integrity sha512-og7DI3Jh/LT9tagbahbqwonvUs6Gru5TS+FVJlPq6UfQScZUDW/Iwm2M0qXQZNdMACX356+WUzcRrF8KW01j4w==
+  dependencies:
+    ramda "^0.27.2"
+    ramda-fantasy "^0.8.0"
+
 supports-color@^7.1.0:
   version "7.2.0"
   resolved "https://registry.npmmirror.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"

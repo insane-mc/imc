@@ -1,6 +1,8 @@
+import { merge } from 'lodash'
 import path from 'path'
 
 import { Context, MinecraftEnhancement, stringifyRawText } from '../../src/index'
+import { generateRecipeBook } from '../../src/packages/recipeBook'
 
 
 const ctx = (new Context())
@@ -54,7 +56,7 @@ ctx.recipe({
 // Enchanted Book (Sharpness I)
 ctx.recipe({
 	name: 'enchanted_book_sharpness',
-	displayName: 'Enchanted Book (Sharpness I)',
+	displayName: 'Sharpness Enchant Book',
 	recipe: [
 		['flint', null, null],
 		[null, 'paper', 'paper'],
@@ -68,7 +70,7 @@ ctx.recipe({
 // Enchanted Book (Power I)
 ctx.recipe({
 	name: 'enchanted_book_power',
-	displayName: 'Enchanted Book (Power I)',
+	displayName: 'Power Enchanted Book',
 	recipe: [
 		['flint', null, null],
 		[null, 'paper', 'paper'],
@@ -96,7 +98,7 @@ ctx.recipe({
 // Enchanted Book (Protection I)
 ctx.recipe({
 	name: 'enchanted_book_protection',
-	displayName: 'Enchanted Book (Protection I)',
+	displayName: 'Protection Enchanted Book',
 	recipe: [
 		['paper', 'paper'],
 		['paper', 'iron_ingot'],
@@ -109,7 +111,7 @@ ctx.recipe({
 // Enchanted Book (Projectile Protection I)
 ctx.recipe({
 	name: 'enchanted_book_projectile_protection',
-	displayName: 'Enchanted Book (Projectile Protection I)',
+	displayName: 'Projectile Protection Enchanted Book',
 	recipe: [
 		['paper', 'paper'],
 		['paper', 'arrow'],
@@ -336,7 +338,7 @@ ctx.recipe({
 // Melon
 ctx.recipe({
 	name: 'melon',
-	displayName: 'melon',
+	displayName: 'Melon',
 	recipe: [
 		['bone_meal', 'wheat_seeds', 'bone_meal'],
 		['wheat_seeds', 'apple', 'wheat_seeds'],
@@ -452,7 +454,20 @@ ctx.recipe({
 // Fusion Armor
 
 
-ctx.on('load', 'tellraw @p {"text":"hypixel-uhc-recipe loaded!"}')
+ctx.on('load', 'tellraw @p ' + stringifyRawText([
+	{ text: "hypixel-uhc-recipe loaded!" },
+]))
+
+const recipeBook = ctx.item(merge(generateRecipeBook(Object.values(ctx.root.$data?.recipe || [])), {
+	data: {
+		title: 'UHC Recipe Book',
+		author: 'memset0 (https://github.com/memset0) & IMC Dev',
+	}
+}))
+const giveRecipeBook = ctx.event({
+	name: 'recipe_book',
+}).trigger(recipeBook.commandGive('@s'))
+
 export async function build(ctx: Context) {
 	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc-recipe'))
 	await ctx.build()
