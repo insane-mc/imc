@@ -9,6 +9,9 @@ import { NamespaceID } from './types'
 export interface ElementMeta {
 	data?: any
 	path?: string
+
+	id?: string
+	spec?: string
 	name?: string
 }
 
@@ -20,7 +23,7 @@ export class ElementCompileResult {
 export class Element {
 	ctx: Context
 	type: keyof ElementCollection
-	data?: any
+	data: any
 
 	id: NamespaceID
 	namespace?: string
@@ -33,15 +36,20 @@ export class Element {
 		this.data = meta.data ? cloneDeep(meta.data) : {}
 		this.ctx = ctx ? ctx : new Context()
 
-		if (meta.name) {
-			this.name = meta.name
+		if (meta.id) {
+			this.id = meta.id
 		} else {
-			this.name = md5(Math.random())
+			if (meta.name) {
+				this.name = meta.name
+			} else {
+				this.name = md5(Math.random())
+			}
+			this.id = this.ctx.id(this.name, {
+				flat: flatPath ? true : false,
+				spec: meta.spec,
+			})
 		}
 
-		this.id = this.ctx.id(this.name, {
-			flat: flatPath ? true : false
-		})
 		const idSplited = this.id.split(':', 2)
 		this.namespace = idSplited[0]
 		this.path = idSplited[1]
@@ -49,7 +57,7 @@ export class Element {
 		this.dir = pathSplited.slice(0, -1).join('/')
 		this.name = pathSplited[pathSplited.length - 1]
 
-		this.ctx.logger.scope('element').debug(this.namespace, this.path, this.id)
+		this.ctx.logger.scope('element').debug(this.type, this.id)
 	}
 }
 

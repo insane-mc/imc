@@ -1,22 +1,9 @@
-import { UUID } from './global'
-import { NBT, NBTPath } from './nbt'
+import { UUID } from './id'
+import { ItemNBT, NBTPath } from './nbt'
 
 
-export type HexWord =
-	'0' | '1' | '2' | '3' | '4' |
-	'5' | '6' | '7' | '8' | '9' |
-	'A' | 'a' | 'B' | 'b' | 'C' |
-	'c' | 'D' | 'd' | 'E' | 'e'
-export type HexColor = `#${HexWord}${HexWord}${HexWord}`
-
-export type MinecraftColor =
-	'black' | 'dark_blue' | 'dark_green' |
-	'dark_aqua' | 'dark_red' | 'dark_purple' |
-	'gold' | 'gray' | 'dark_gray' |
-	'blue' | 'green' | 'aqua' |
-	'red' | 'light_purple' | 'yellow' |
-	'white' | 'reset'
-
+// https://wiki.biligame.com/mc/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F
+export type RawText = string | boolean | number | RawTextObject | Array<RawTextObject>
 
 export type RawTextComponent = {
 	text: string
@@ -67,7 +54,7 @@ export type RawTextObject = RawTextComponent & {
 		content?: {
 			id?: string
 			conut?: number
-			tag?: NBT
+			tag?: ItemNBT
 		}
 	} | {
 		action: 'show_entity'
@@ -79,5 +66,29 @@ export type RawTextObject = RawTextComponent & {
 	}
 }
 
-// https://wiki.biligame.com/mc/%E5%8E%9F%E5%A7%8BJSON%E6%96%87%E6%9C%AC%E6%A0%BC%E5%BC%8F
-export type RawText = string | boolean | number | RawTextObject | Array<RawTextObject>
+
+
+export type HexWord =
+	'0' | '1' | '2' | '3' | '4' |
+	'5' | '6' | '7' | '8' | '9' |
+	'A' | 'a' | 'B' | 'b' | 'C' |
+	'c' | 'D' | 'd' | 'E' | 'e'
+export type HexColor = `#${HexWord}${HexWord}${HexWord}`
+
+export type DecimalColor = number
+
+
+export type MinecraftColor =
+	'black' | 'dark_blue' | 'dark_green' |
+	'dark_aqua' | 'dark_red' | 'dark_purple' |
+	'gold' | 'gray' | 'dark_gray' |
+	'blue' | 'green' | 'aqua' |
+	'red' | 'light_purple' | 'yellow' |
+	'white' | 'reset'
+
+export function stringifyRawText(data: RawTextObject | Array<RawTextObject>, plain: boolean = false): string {
+	if (plain) {
+		return [data].flat().map((obj: any) => (obj.text || '')).join('')
+	}
+	return JSON.stringify(data)
+}

@@ -59,7 +59,10 @@ export class Event extends Element {
 
 	constructor(meta: EventMeta, ctx: Context) {
 		super(meta, ctx)
+
 		this.callback = []
+
+		this.ctx.logger.scope('event').debug(this.type, this.id)
 	}
 }
 

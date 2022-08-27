@@ -1,6 +1,6 @@
 import path from 'path'
 
-import { Context } from '../../src/index'
+import { Context, stringifyRawText } from '../../src/index'
 
 
 const ctx = (new Context())
@@ -8,11 +8,53 @@ const ctx = (new Context())
 
 
 // Apprentice Helmet
+ctx.recipe({
+	name: 'apprentice_helmet',
+	recipe: [
+		['minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_ingot'],
+		['minecraft:iron_ingot', 'minecraft:redstone_torch', 'minecraft:iron_ingot'],
+	],
+	result: ctx.item({
+		id: 'minecraft:iron_helmet',
+		data: {
+			display: {
+				Name: stringifyRawText({ text: 'Apprentice Helmet' }),
+			},
+			Enchantments: [
+				{ id: 'minecraft:protection', lvl: 1 },
+				{ id: 'minecraft:fire_protection', lvl: 1 },
+				{ id: 'minecraft:blast_protection', lvl: 1 },
+				{ id: 'minecraft:projectile_protection', lvl: 1 },
+			],
+		}
+	}),
+})
 // Apprentice Sword
 // Apprentice Bow
 // Master's Compass
 
 // Vorpal Sword
+ctx.recipe({
+	name: 'vorpal_sword',
+	recipe: [
+		['minecraft:iron_ingot', 'minecraft:iron_ingot', 'minecraft:iron_ingot'],
+		['minecraft:iron_ingot', 'minecraft:redstone_torch', 'minecraft:iron_ingot'],
+	],
+	result: ctx.item({
+		id: 'minecraft:iron_sword',
+		data: {
+			display: {
+				Name: stringifyRawText({ text: 'Vorpal Sword' }),
+			},
+			Enchantments: [
+				{ id: 'minecraft:protection', lvl: 1 },
+				{ id: 'minecraft:fire_protection', lvl: 1 },
+				{ id: 'minecraft:blast_protection', lvl: 1 },
+				{ id: 'minecraft:projectile_protection', lvl: 1 },
+			],
+		}
+	}),
+})
 // Enchanted Book (Sharpness I)
 // Enchanted Book (Power I)
 // Dragon Sword

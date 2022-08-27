@@ -110,7 +110,7 @@ export class Context {
 	// }
 
 	id(name: string, options?: ContextMethodIdOptions): NamespaceID {
-		options = merge({ flat: false, spec: '' }, options || {})
+		options = options || {}
 
 		let namespace, path
 
@@ -134,8 +134,8 @@ export class Context {
 			}
 		}
 
-		// this.logger.scope('id').debug(name, namespace, path)
-		return namespace.join('.') + ':' + path.join(options.flat ? '/' : '___')
+		this.logger.scope('id').debug(name, namespace, path, options)
+		return namespace.join('.') + ':' + path.join(options.flat ? '___' : '/')
 	}
 
 	namespace(value: string | Array<string>, options?: any): Context {

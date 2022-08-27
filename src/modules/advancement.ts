@@ -39,7 +39,7 @@ export interface AdvancementData {
 }
 
 export interface AdvancementMeta extends ElementMeta {
-	data?: AdvancementData
+	data: AdvancementData
 
 	name?: string
 	hide?: boolean
@@ -53,7 +53,7 @@ export class Advancement extends Element {
 
 	build(): BuildResult {
 		return {
-			path: `data/${this.namespace}/recipes/${this.path}.json`,
+			path: `data/${this.namespace}/advancements/${this.path}.json`,
 			data: this.ctx.stringifyJSON(this.data),
 		}
 	}

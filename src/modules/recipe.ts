@@ -1,4 +1,9 @@
+import { isEmpty } from 'lodash'
+
 import { Item } from './item'
+import { Event } from './event'
+import { Advancement } from './advancement'
+import { stringifyRawText } from '../types'
 import { Element, ElementMeta } from '../element'
 import { Context, BuildResult } from '../context'
 
@@ -14,7 +19,7 @@ export interface RecipeData {
 	group?: string
 
 	// minecraft:crafting_shaped
-	pattern?: [string, string, string]
+	pattern?: Array<string>
 	key?: {
 		[keyName: string]: RecipeMaterial
 	}
@@ -22,6 +27,8 @@ export interface RecipeData {
 		item: string
 		count?: number
 	}
+
+	__displayName__?: string
 }
 
 export type RecipeMaterialMeta = null | string | Item | RecipeMaterial
@@ -30,20 +37,25 @@ export interface RecipeMeta extends ElementMeta {
 
 	name?: string
 	displayName?: string
-	recipe?: [
-		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
-		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
-		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
-	]
+	recipe?: Array<Array<RecipeMaterialMeta>>
 	result?: string | Item | { item: string }
 	resultCount?: number
 }
 
 
+const RecipePatternString = [
+	['&', 'U', '%'],
+	['L', 'O', 'R'],
+	['#', 'D', '$'],
+]
+
+
 export class Recipe extends Element {
 	data: RecipeData
 	displayName: string
-	private onCrafted?: Event
+
+	private craftedEvent?: Event
+	private craftedAdvancement?: Advancement
 
 	private static fromMaterialMeta(meta: RecipeMaterialMeta): RecipeMaterial {
 		if (typeof meta === 'string') {
@@ -59,10 +71,27 @@ export class Recipe extends Element {
 
 	on(eventName: 'crafted'): Event {
 		if (eventName === 'crafted') {
-			if (!this.onCrafted) {
-				// this.onCrafted= this.ctx.event('')
+			if (!this.craftedEvent) {
+				this.craftedEvent = this.ctx.event({
+					name: this.name,
+					spec: 'recipe_crafted',
+				})
+				this.craftedAdvancement = this.ctx.advancement({
+					name: this.name,
+					spec: 'recipe_crafted',
+					// hide: true,   // BUG?
+					data: {
+						criteria: {
+							Unlocked: {
+								trigger: 'minecraft:recipe_unlocked',
+								conditions: { recipe: this.id }
+							}
+						},
+						rewards: { function: this.craftedEvent.id }
+					}
+				})
 			}
-			return this.onCrafted
+			return this.craftedEvent
 		}
 		return
 	}
@@ -80,30 +109,60 @@ export class Recipe extends Element {
 		this.type = 'recipe'
 
 		this.data.type = this.data.type || 'minecraft:crafting_shaped'
-		this.displayName = meta.displayName || this.name
 
 		if (this.data.type === 'minecraft:crafting_shaped') {
 			if (meta.recipe) {
 				this.data.key = {}
-				this.data.pattern = ['', '', '']
-				for (let i = 0; i < 3; i++) {
-					for (let j = 0; j < 3; j++) {
+				this.data.pattern = []
+				for (let i = 0; i < meta.recipe.length; i++) {
+					let pattern = ''
+					for (let j = 0; j < meta.recipe[i].length; j++) {
 						if (meta.recipe[i][j]) {
-							const key = String.fromCharCode(65 + i * 3 + j)
-							this.data.pattern[i] += key
+							const key = RecipePatternString[i][j]
 							this.data.key[key] = Recipe.fromMaterialMeta(meta.recipe[i][j])
+							pattern += key
 						} else {
-							this.data.pattern[i] += ' '
+							pattern += ' '
 						}
 					}
+					this.data.pattern.push(pattern)
 				}
 			}
 
 			if (meta.result) {
-				this.data.result = Recipe.fromMaterialMeta(meta.result) as unknown as { item: string }
-				if (meta.resultCount) {
-					this.data.result.count = meta.resultCount
+				if (!(meta.result instanceof Item) || isEmpty(meta.result)) {
+					this.data.result = Recipe.fromMaterialMeta(meta.result) as unknown as { item: string }
+					if (meta.resultCount) {
+						this.data.result.count = meta.resultCount
+					}
+
+				} else {
+					if (meta.result.data.display.Name) {
+						this.displayName = stringifyRawText(JSON.parse(meta.result.data.display.Name), true)
+					}
+
+					this.data.result = { item: 'minecraft:knowledge_book' }
+
+					this.ctx.logger.debug(meta.result.commandGive('@s'))
+					this.on('crafted').trigger([
+						`recipe take @s ${this.id}`,
+						`advancement revoke @s only ${this.craftedAdvancement.id}`,
+						'clear @s minecraft:knowledge_book',
+						meta.result.commandGive('@s'),
+					].join('\n'))
+					this.ctx.on('load', [
+						`recipe take @p ${this.id}`,
+						`advancement revoke @p only ${this.craftedAdvancement.id}`,
+						'clear @p minecraft:knowledge_book',
+					].join('\n'))
 				}
+			}
+
+			if (meta.displayName) { this.displayName = meta.displayName }
+			if (this.displayName) {
+				this.data.__displayName__ = this.displayName
+			} else {
+				this.displayName = this.id
 			}
 		}
 	}
