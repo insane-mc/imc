@@ -217,7 +217,7 @@ export class Context {
 	}
 
 	on(eventName: string, callback?: EventCallback): Event | Context {
-		this.logger.debug(eventName, callback, (eventName in Object.keys(InternalEventFactory)))
+		// this.logger.debug(eventName, callback, (eventName in Object.keys(InternalEventFactory)))
 		if (Object.keys(InternalEventFactory).includes(eventName)) {
 			return this.onInternal(eventName as InternalEventName, callback)
 		}

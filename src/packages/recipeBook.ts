@@ -73,26 +73,24 @@ export function generateRecipeBook(recipes: Array<Recipe>, title?: string): Item
 		let lineCount = Object.keys(e.recipe.data.key).length
 
 		if (e.recipe.result) {
-			e.page.push({ text: Item.toDisplayName(e.recipe.result.id), bold: true, color: 'dark_purple' })
-			e.page.push(rawtext('\n'))
-			lineCount += 1
+			const rawtexts = []
+			rawtexts.push({ text: Item.toDisplayName(e.recipe.result.id), bold: true, color: 'dark_purple' })
+			rawtexts.push(rawtext('\n'))
 			if (e.recipe.result.data.display?.Lore) {
-				e.page.push(JSON.parse(e.recipe.result.data.display?.Lore))
-				e.page.push(rawtext('\n'))
-				lineCount += 1
+				rawtexts.push(JSON.parse(e.recipe.result.data.display?.Lore))
+				rawtexts.push(rawtext('\n'))
 			}
-			console.log(e.recipe.result.data.Enchantments, e.recipe.result.data.StoredEnchantments)
 			for (const enchantment of [
 				...(e.recipe.result.data.Enchantments || []),
 				...(e.recipe.result.data.StoredEnchantments || []),
 			]) {
-				e.page.push({ text: `${Item.toDisplayName(enchantment.id)} ${arabToRoman(enchantment.lvl)}\n`, color: 'gray' })
-				lineCount += 1
+				rawtexts.push({ text: `${Item.toDisplayName(enchantment.id)} ${arabToRoman(enchantment.lvl)}\n`, color: 'gray' })
 			}
 			if (e.recipe.result.count > 1) {
-				e.page.push({ text: ` [x${this.count}]\n`, color: 'light_purple' })
+				rawtexts.push({ text: ` [x${this.count}]\n`, color: 'light_purple' })
 			}
-			lineCount += 1
+			e.page.push.apply(e.page, rawtexts)
+			lineCount += stringifyRawText(rawtexts, true).match(/\n/g)?.length || 0
 		} else {
 			e.page.push({ text: `${Item.toDisplayName(Recipe.stringifyMaterial(e.recipe.data.result))}`, bold: true, color: 'dark_purple' })
 			e.page.push({ text: ` [x${e.recipe.data.result.count || 1}]\n`, color: 'light_purple' })
@@ -123,7 +121,7 @@ export function generateRecipeBook(recipes: Array<Recipe>, title?: string): Item
 			for (const key in e.recipe.data.key) {
 				const item = e.recipe.data.key[key]
 				e.page.push({ text: ` [${key}] `, bold: true, color: colorMap[key] })
-				e.page.push({ text: Recipe.stringifyMaterial(item), color: 'dark_gray' })
+				e.page.push({ text: Item.toDisplayName(Recipe.stringifyMaterial(item)), color: 'dark_gray' })
 				e.page.push({ text: '\n' })
 			}
 

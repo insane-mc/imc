@@ -137,7 +137,7 @@ ctx.recipe({
 })
 // Nether Wart
 ctx.recipe({
-	name: 'glowstone_dust',
+	name: 'nether_wart',
 	displayName: 'Nether Wart',
 	recipe: [
 		[null, 'wheat_seeds', null],
@@ -230,7 +230,7 @@ ctx.recipe({
 })
 // Tarnhelm
 ctx.recipe({
-	name: 'apprentice_helmet',
+	name: 'tarnhelm',
 	recipe: [
 		['diamond', 'iron_ingot', 'diamond'],
 		['diamond', 'redstone_block', 'diamond'],
@@ -258,7 +258,7 @@ ctx.recipe({
 	result: ctx.item({
 		id: 'minecraft:diamond_pickaxe',
 		data: {
-			display: { Name: stringifyRawText({ text: 'Philosopher\'s Pickaxe' }) },
+			display: { Name: stringifyRawText({ text: 'Philosopherʼs Pickaxe' }) },
 			Enchantments: [
 				{ id: 'minecraft:fortune', lvl: 2 },
 			],
@@ -270,7 +270,7 @@ ctx.recipe({
 // Bottle o' Enchanting
 ctx.recipe({
 	name: 'experience_bottle',
-	displayName: 'Bottle o\' Enchanting',
+	displayName: 'Bottle oʼ Enchanting',
 	recipe: [
 		[null, 'redstone_block', null],
 		['redstone_block', 'glass_bottle', 'redstone_block'],
@@ -304,7 +304,7 @@ ctx.recipe({
 // Artemis' Book
 ctx.recipe({
 	name: 'artemis_book',
-	displayName: 'Artemis\' Book',
+	displayName: 'Artemisʼ Book',
 	recipe: [
 		['ender_eye', null, null],
 		[null, 'paper', 'paper'],
@@ -371,7 +371,7 @@ ctx.recipe({
 		id: 'minecraft:player_head',
 		data: {
 			display: { Name: stringifyRawText({ text: 'Golden Head' }) },
-			SkullOwner: "PhantomTupac",
+			SkullOwner: 'PhantomTupac',
 		}
 	}),
 })
@@ -454,19 +454,38 @@ ctx.recipe({
 // Fusion Armor
 
 
-ctx.on('load', 'tellraw @p ' + stringifyRawText([
-	{ text: "hypixel-uhc-recipe loaded!" },
-]))
-
 const recipeBook = ctx.item(merge(generateRecipeBook(Object.values(ctx.root.$data?.recipe || [])), {
 	data: {
 		title: 'UHC Recipe Book',
-		author: 'memset0 (https://github.com/memset0) & IMC Dev',
+		author: 'memset0 & IMC Dev.',
 	}
 }))
 const giveRecipeBook = ctx.event({
 	name: 'recipe_book',
 }).trigger(recipeBook.commandGive('@s'))
+
+ctx.on('load', 'tellraw @p ' + stringifyRawText([
+	{ text: 'Datapack ' },
+	{ text: 'hypixel-uhc-recipe', bold: true, color: 'blue' },
+	{ text: ' is loaded.\n' },
+	{ text: 'Click ' },
+	{
+		text: 'here', underlined: true, color: 'green',
+		clickEvent: {
+			action: 'run_command',
+			value: `/function ${giveRecipeBook.id}`,
+		}
+	},
+	{ text: ' or use command ' },
+	{
+		text: `/function ${giveRecipeBook.id}`, color: 'gold',
+		clickEvent: {
+			action: 'copy_to_clipboard',
+			value: `/function ${giveRecipeBook.id}`,
+		}
+	},
+	{ text: ' to get the recipe book.\n' }
+]))
 
 export async function build(ctx: Context) {
 	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc-recipe'))

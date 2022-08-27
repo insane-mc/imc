@@ -43,7 +43,7 @@ export interface RecipeMeta extends ElementMeta {
 }
 
 
-const RecipePatternString = ['O', 'X', '#', '$', '=', '&', '%', '*', 'U']
+const RecipePatternString = ['#', 'X', 'O', '$', '&', '%', '*', '=', 'U']
 
 
 export class Recipe extends Element {

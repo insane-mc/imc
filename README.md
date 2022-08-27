@@ -39,7 +39,7 @@ We also implement a event system depended on context, so you can easily set call
 
 Enjoy better custom crafting! You can now add recipes whose product contains NBT data, and even set the number of times limit for it. IMC will automatically convert it to Minecraft Datapacks for you.
 
-We could event export all your recipe into a recipe book, then you could use give command to let every player get it.
+We could even export all your recipes into a recipe book, then you could use commands to give it to other players.
 
 
 ### Advancement
