@@ -461,7 +461,7 @@ const recipeBook = ctx.item(merge(generateRecipeBook(Object.values(ctx.root.$dat
 	}
 }))
 const giveRecipeBook = ctx.event({
-	name: 'recipe_book',
+	name: 'give_recipe_book',
 }).trigger(recipeBook.commandGive('@s'))
 
 ctx.on('load', 'tellraw @p ' + stringifyRawText([
