@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "repository": "https://github.com/insane-mc/imc.git",
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "AGPL 3.0",
   "scripts": {
     "test": "ts-node ./tests/index.ts"
   },
