@@ -6,10 +6,10 @@
 
 
 
-### Supported Features
+## Supported Features
 
 
-#### MC Lang (Building)
+### MC Lang (Building)
 
 Have you ever wanted make your code reusable? Have you ever dreamed of declaring `mcfunction`s with parameters? Have you ever been confused by the messy directories of Minecraft Datapacks?
 
@@ -26,15 +26,20 @@ $tell("World!")
 See [API Document](#) for more syntax.
 
 
-#### Context
+### Context
 
-To better organize our code, we provide the context feature. You can pass namespace and directory data via Javascript chaining calls.
+To better organize our code, we provide the context feature. You can pass namespace and directory data via chaining calls.
 
 For example, when you call `ctx.dir('xxx')` that `ctx` is a context, it will return a new context with directory set to `xxx`. When you declare functions via the returned context, they will be created in folder `xxx`.
 
 We also implement a event system depended on context, so you can easily set callbacks for succeful custom crafting attempts, for example.
 
 
-#### Recipe
+### Recipe
 
 Enjoy better custom crafting! You can now add recipes whose product contains NBT data, and even set the number of times limit for it. IMC will automatically convert it to Minecraft Datapacks for you.
+
+
+### Advancement
+
+// TODO
