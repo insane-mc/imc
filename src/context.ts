@@ -134,7 +134,7 @@ export class Context {
 			}
 		}
 
-		this.logger.scope('id').debug(name, namespace, path, options)
+		// this.logger.scope('id').debug(name, namespace, path, options)
 		return namespace.join('.') + ':' + path.join(options.flat ? '___' : '/')
 	}
 

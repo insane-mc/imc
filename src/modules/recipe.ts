@@ -90,6 +90,17 @@ export class Recipe extends Element {
 						rewards: { function: this.craftedEvent.id }
 					}
 				})
+				this.craftedEvent.trigger({
+					level: -1,
+					data: [
+						`recipe take @s ${this.id}`,
+						`advancement revoke @s only ${this.craftedAdvancement.id}`,
+					].join('\n'),
+				})
+				this.ctx.on('load', [
+					`recipe take @p ${this.id}`,
+					`advancement revoke @p only ${this.craftedAdvancement.id}`,
+				].join('\n'))
 			}
 			return this.craftedEvent
 		}
@@ -137,23 +148,15 @@ export class Recipe extends Element {
 					}
 
 				} else {
-					if (meta.result.data.display.Name) {
+					if (meta.result.data.display?.Name) {
 						this.displayName = stringifyRawText(JSON.parse(meta.result.data.display.Name), true)
 					}
 
 					this.data.result = { item: 'minecraft:knowledge_book' }
 
-					this.ctx.logger.debug(meta.result.commandGive('@s'))
 					this.on('crafted').trigger([
-						`recipe take @s ${this.id}`,
-						`advancement revoke @s only ${this.craftedAdvancement.id}`,
 						'clear @s minecraft:knowledge_book',
 						meta.result.commandGive('@s'),
-					].join('\n'))
-					this.ctx.on('load', [
-						`recipe take @p ${this.id}`,
-						`advancement revoke @p only ${this.craftedAdvancement.id}`,
-						'clear @p minecraft:knowledge_book',
 					].join('\n'))
 				}
 			}

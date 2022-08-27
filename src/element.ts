@@ -57,7 +57,7 @@ export class Element {
 		this.dir = pathSplited.slice(0, -1).join('/')
 		this.name = pathSplited[pathSplited.length - 1]
 
-		this.ctx.logger.scope('element').debug(this.type, this.id)
+		// this.ctx.logger.scope('element').debug(this.type, this.id)
 	}
 }
 

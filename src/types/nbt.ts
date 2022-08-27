@@ -21,6 +21,10 @@ export interface ItemNBT {
 	HideFlags?: number,   // 0~127 integer
 	generation?: number,   // 0~3 integer
 	Damage?: number,
+
+	StoredEnchantments?: Array<{ id: MinecraftEnhancement, lvl: number }>
+
+	[K: string]: any
 }
 
 export interface BlockNBT {

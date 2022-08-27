@@ -1,4 +1,5 @@
-export type MinecraftEnhancement = 'minecraft:aqua_affinity' |
+export type MinecraftEnhancement =
+	'minecraft:aqua_affinity' |
 	'minecraft:bane_of_arthropods' |
 	'minecraft:blast_protection' |
 	'minecraft:channeling' |

@@ -62,7 +62,7 @@ export class Event extends Element {
 
 		this.callback = []
 
-		this.ctx.logger.scope('event').debug(this.type, this.id)
+		// this.ctx.logger.scope('event').debug(this.type, this.id)
 	}
 }
 

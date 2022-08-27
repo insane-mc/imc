@@ -16,8 +16,9 @@ export class Item extends Element {
 	count: number
 	slot: number
 
-	commandGive(target) {
-		return `give ${target} ${this.id}${JSON.stringify(this.data)} ${this.count}`
+	commandGive(target, count?: number) {
+		count = count || this.count
+		return `give ${target} ${this.id}${JSON.stringify(this.data)} ${count !== 1 ? count : ''}`.trim()
 	}
 
 	constructor(meta: ItemMeta, ctx: Context) {
