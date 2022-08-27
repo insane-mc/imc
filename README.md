@@ -1,7 +1,7 @@
+<br>
 <p align="center">
 	<img align="center" src="./assets/logo.png">
 </p>
-<br>
 
 <img src="https://tokei.rs/b1/github/insane-mc/imc">
 
