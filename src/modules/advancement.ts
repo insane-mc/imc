@@ -1,6 +1,6 @@
 import { Predicate } from './predicate'
+import { RawText, NamespaceID } from '../types'
 import { Element, ElementMeta } from '../element'
-import { RawText, NamespaceID } from './interface'
 import { Context, BuildResult } from '../context'
 
 

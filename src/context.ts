@@ -4,14 +4,14 @@ import { Stream } from 'stream'
 import { uniq, merge, cloneDeep } from 'lodash'
 
 import { Logger } from './logger'
-import { NamespaceID } from './types/interface'
-import { EventCallback, InternalEventName, InternalEventFactory } from './types/event'
+import { NamespaceID } from './types'
+import { EventCallback, InternalEventName, InternalEventFactory } from './modules/event'
 import { ElementMeta, ElementCreater, ElementName, ElementCollection } from './element'
 
-import { Advancement, AdvancementMeta } from './types/advancement'
-import { Event, EventMeta } from './types/event'
-import { Item, ItemMeta } from './types/item'
-import { Recipe, RecipeMeta } from './types/recipe'
+import { Advancement, AdvancementMeta } from './modules/advancement'
+import { Event, EventMeta } from './modules/event'
+import { Item, ItemMeta } from './modules/item'
+import { Recipe, RecipeMeta } from './modules/recipe'
 
 
 export interface ContextPromise {

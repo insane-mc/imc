@@ -1,11 +1,5 @@
-export type NamespaceID = string
-
-export type UUID = string   // TODO
-
-
-export type NBT = any   // TODO 
-
-export type NBTPath = any   // TODO
+import { UUID } from './global'
+import { NBT, NBTPath } from './nbt'
 
 
 export type HexWord =

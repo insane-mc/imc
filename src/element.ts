@@ -2,8 +2,8 @@ import md5 from 'md5'
 import { Stream } from 'stream'
 import { cloneDeep } from 'lodash'
 
-import { NamespaceID } from './types/interface'
 import { Context } from './context'
+import { NamespaceID } from './types'
 
 
 export interface ElementMeta {
@@ -58,10 +58,10 @@ export type ElementCreater<T extends Element> = { new(meta: any, ctx: Context): 
 
 
 
-import { Advancement, AdvancementMeta } from './types/advancement'
-import { Item, ItemMeta } from './types/item'
-import { Event, EventMeta } from './types/event'
-import { Recipe, RecipeMeta } from './types/recipe'
+import { Advancement, AdvancementMeta } from './modules/advancement'
+import { Event, EventMeta } from './modules/event'
+import { Item, ItemMeta } from './modules/item'
+import { Recipe, RecipeMeta } from './modules/recipe'
 
 export class ElementCollection {
 	advancement: Advancement
