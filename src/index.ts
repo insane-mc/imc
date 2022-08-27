@@ -10,3 +10,5 @@ export * from './modules/function'
 export * from './modules/item'
 export * from './modules/predicate'
 export * from './modules/recipe'
+
+export * from './components/recipe-book'

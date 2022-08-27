@@ -6,7 +6,7 @@
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
   "license": "AGPL 3.0",
   "scripts": {
-    "test": "ts-node ./tests/index.ts"
+    "test": "ts-node -r tsconfig-paths/register ./tests/index.ts"
   },
   "dependencies": {
     "@types/lodash": "^4.14.184",
@@ -15,6 +15,7 @@
     "dayjs": "^1.11.5",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
-    "roman-numbers": "^1.0.2"
+    "roman-numbers": "^1.0.2",
+    "tsconfig-paths": "^4.1.0"
   }
 }

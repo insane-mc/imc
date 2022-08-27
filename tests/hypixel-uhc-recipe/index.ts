@@ -1,13 +1,10 @@
+import { Context, stringifyRawText, generateRecipeBook } from 'insane-mc'
 import { merge } from 'lodash'
 import path from 'path'
-
-import { Context, MinecraftEnhancement, stringifyRawText } from '../../src/index'
-import { generateRecipeBook } from '../../src/packages/recipeBook'
 
 
 const ctx = (new Context())
 	.namespace('uhc.recipe')
-
 
 // Apprentice Helmet
 ctx.recipe({
