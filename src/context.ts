@@ -5,9 +5,11 @@ import { uniq, merge, cloneDeep } from 'lodash'
 
 import { Logger } from './logger'
 import { NamespaceID } from './types/interface'
+import { EventCallback, InternalEventName, InternalEventFactory } from './types/event'
 import { ElementMeta, ElementCreater, ElementName, ElementCollection } from './element'
 
 import { Advancement, AdvancementMeta } from './types/advancement'
+import { Event, EventMeta } from './types/event'
 import { Item, ItemMeta } from './types/item'
 import { Recipe, RecipeMeta } from './types/recipe'
 
@@ -22,6 +24,11 @@ export interface ContextMethodIdOptions {
 	spec?: string
 }
 
+export interface BuildResult {
+	path: string
+	data: string | Stream
+}
+
 
 export class Context {
 	logger: Logger
@@ -29,9 +36,12 @@ export class Context {
 	$config?: any
 	$pool?: Array<NamespaceID>
 	$promises?: Array<ContextPromise>
+	$event: {
+		[K in InternalEventName]?: Event
+	}
 	$data?: {
 		[elementName in ElementName]?: {
-			[key: string]: ElementCollection[elementName]
+			[K: string]: ElementCollection[elementName]
 		}
 	}
 
@@ -54,6 +64,7 @@ export class Context {
 			return JSON.stringify(data, null, 2)
 		}
 	}
+
 
 
 	// Basic Methods
@@ -85,6 +96,7 @@ export class Context {
 	}
 
 
+
 	// Exposed Methods
 
 	// require(declaration: string, additional?: string): Promise<Context> {
@@ -100,19 +112,30 @@ export class Context {
 	id(name: string, options?: ContextMethodIdOptions): NamespaceID {
 		options = merge({ flat: false, spec: '' }, options || {})
 
-		const namespace = cloneDeep(this.$namespace)
-		if (!namespace.length) {
-			namespace.push('imc')
+		let namespace, path
+
+		if (name.includes(':')) {
+			const temp = name.split(':', 2)
+			namespace = temp[0].split('.')
+			path = temp[1].split('/')
+		} else {
+			namespace = cloneDeep(this.$namespace)
+			if (!namespace.length) {
+				namespace.push('imc')
+			}
+			if (name.startsWith('/')) {
+				path = name.split('/').slice(1)
+			} else {
+				path = cloneDeep(this.$dir)
+				if (options.spec) {
+					path.push(`__imc_${options.spec}__`)
+				}
+				path.push.apply(path, name.split('/'))
+			}
 		}
 
-		const dir = cloneDeep(this.$dir)
-		if (options.spec) {
-			dir.push(`__imc_${options.spec}__`)
-		}
-		dir.push.apply(dir, name.split('/'))
-
-		this.logger.scope('id').info(name, dir)
-		return namespace.join('.') + ':' + dir.join(options.flat ? '/' : '___')
+		// this.logger.scope('id').debug(name, namespace, path)
+		return namespace.join('.') + ':' + path.join(options.flat ? '/' : '___')
 	}
 
 	namespace(value: string | Array<string>, options?: any): Context {
@@ -166,11 +189,41 @@ export class Context {
 	}
 
 
+
 	// Element Operations
 
 	recipe(meta: string | RecipeMeta) { return this.declare('recipe', meta, Recipe) }
-	item(meta: string | ItemMeta) { return this.declare('recipe', meta, Item) }
+	event(meta: string | EventMeta) { return this.declare('event', meta, Event) }
+	item(meta: string | ItemMeta) { return this.declare('item', meta, Item) }
 	advancement(meta: string | AdvancementMeta) { return this.declare('advancement', meta, Advancement) }
+
+
+
+	// Event Operations
+
+	private onInternal(eventName: InternalEventName, callback?: EventCallback): Event | Context {
+		if (!this.isRoot) { return this.root.on(eventName, callback) }
+		if (!(eventName in this.$event)) {
+			this.$event[eventName] = InternalEventFactory[eventName](this)
+			if (!this.root.$data.event) { this.root.$data.event = {} }
+			this.$data.event[this.$event[eventName].id] = this.$event[eventName]
+		}
+		if (callback) {
+			this.$event[eventName].trigger(callback)
+			return this
+		} else {
+			return this.$event[eventName]
+		}
+	}
+
+	on(eventName: string, callback?: EventCallback): Event | Context {
+		this.logger.debug(eventName, callback, (eventName in Object.keys(InternalEventFactory)))
+		if (Object.keys(InternalEventFactory).includes(eventName)) {
+			return this.onInternal(eventName as InternalEventName, callback)
+		}
+		return this
+	}
+
 
 
 	// Build Process
@@ -196,13 +249,19 @@ export class Context {
 			},
 			filter: this.$config.packMeta?.filter || {},
 		})))
+		promises.push(writeFile('data/minecraft/tags/functions/tick.json', this.stringifyJSON({
+			values: ["imc:tick"]
+		})))
+		promises.push(writeFile('data/minecraft/tags/functions/load.json', this.stringifyJSON({
+			values: ["imc:load"]
+		})))
 		for (const type in this.$data) {
 			for (const id in this.$data[type]) {
 				const element = this.$data[type][id]
-				if (!element.compile) { continue }
-				const result = element.compile()
-				logger.info(id, result.dir)
-				promises.push(writeFile(result.dir, result.data))
+				if (!element.build) { continue }
+				const result: BuildResult = element.build()
+				logger.info(id, result.path)
+				promises.push(writeFile(result.path, result.data))
 			}
 		}
 		await Promise.all(promises)
@@ -256,6 +315,7 @@ export class Context {
 			this.$config = {}
 			this.$pool = []
 			this.$data = {}
+			this.$event = {}
 
 			this.$namespace = []
 			this.$dir = []

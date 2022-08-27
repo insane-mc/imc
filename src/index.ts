@@ -3,6 +3,8 @@ export * from './logger'
 export * from './element'
 
 export * from './types/advancement'
+export * from './types/event'
+export * from './types/function'
 export * from './types/interface'
 export * from './types/item'
 export * from './types/predicate'

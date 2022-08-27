@@ -3,19 +3,9 @@ import path from 'path'
 import { Context } from '../../src/index'
 
 
-const ctx = new Context()
+const ctx = (new Context())
+	.namespace('uhc.recipe')
 
-const recipe = ctx.recipe({
-	name: 'test',
-	recipe: [
-		['minecraft:dirt', 'minecraft:dirt', 'minecraft:dirt'],
-		['minecraft:dirt', null, 'minecraft:dirt'],
-		['minecraft:dirt', 'minecraft:dirt', { item: 'minecraft:dirt' }],
-	],
-	result: 'minecraft:stone',
-	resultCount: 9,
-})
-ctx.logger.debug(recipe.data)
 
 // Apprentice Helmet
 // Apprentice Sword
@@ -43,10 +33,59 @@ ctx.logger.debug(recipe.data)
 // Seven-league Boots
 
 // Iron Ingot
-// 
+ctx.recipe({
+	name: 'iron_ingot',
+	displayName: 'Iron Ingot',
+	recipe: [
+		['minecraft:raw_iron', 'minecraft:raw_iron', 'minecraft:raw_iron'],
+		['minecraft:raw_iron', 'minecraft:coal', 'minecraft:raw_iron'],
+		['minecraft:raw_iron', 'minecraft:raw_iron', 'minecraft:raw_iron'],
+	],
+	result: 'minecraft:iron_ingot',
+	resultCount: 10,
+})
+// Obsidian
+// Tarnhelm
+// Philosopher's Pickaxe
 
-ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc-recipe'))
-ctx.build()
+// Golden Head
+// Pandora's Box
+// Panacea
+// Cupid's Bow
 
-ctx.config('dist', path.join('D:\\Game\\Minecraft\\.minecraft\\versions\\1.19 fabric\\saves\\imc-test\\datapacks','uhc-recipe'))
-ctx.build()
+// Arrow
+// Saddle
+// Potion of Velocity
+// Fenrir
+
+// Forge
+// Iron Pickaxe
+// Lumber jack's Axe
+// Enhancement Book (30 Level)
+
+// Gold Ingot
+ctx.recipe({
+	name: 'gold_ingot',
+	displayName: 'Gold Ingot',
+	recipe: [
+		['minecraft:raw_gold', 'minecraft:raw_gold', 'minecraft:raw_gold'],
+		['minecraft:raw_gold', 'minecraft:coal', 'minecraft:raw_gold'],
+		['minecraft:raw_gold', 'minecraft:raw_gold', 'minecraft:raw_gold'],
+	],
+	result: 'minecraft:gold_ingot',
+	resultCount: 10,
+})
+// Sugar Canes
+// Backpack
+// Fusion Armor
+
+
+ctx.on('load', 'tellraw @p {"text":"hypixel-uhc-recipe loaded!"}')
+export async function build(ctx: Context) {
+	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc-recipe'))
+	await ctx.build()
+
+	ctx.config('dist', path.join('D:\\Game\\Minecraft\\.minecraft\\versions\\1.19 fabric\\saves\\imc-test\\datapacks', 'uhc-recipe'))
+	await ctx.build()
+}
+build(ctx.root)

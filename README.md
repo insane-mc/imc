@@ -2,7 +2,7 @@
 <p align="center">An <strong>I</strong>nsane <strong>M</strong>inecraft <strong>C</strong>ompiler for Building Datapacks</p>
 <br>
 
-> **This project is under development and all API interfaces may be unstable or unsupported.**
+> This project is still under development and all API interfaces may be unstable or not supported yet.
 
 
 
@@ -11,9 +11,9 @@
 
 #### MC Lang (Building)
 
-Have you ever wanted reusable of your code? Have you ever dreamed of declaring `mcfunction`s with parameters? Have you ever been confused by the messy directories of Minecraft Datapacks?
+Have you ever wanted make your code reusable? Have you ever dreamed of declaring `mcfunction`s with parameters? Have you ever been confused by the messy directories of Minecraft Datapacks?
 
-Now introducing a new scripting language -- MC Lang, here is a simple example.
+Now introducing a new scripting language - MC Lang, here is an example.
 
 ```plain
 def tell($a) {
@@ -30,7 +30,9 @@ See [API Document](#) for more syntax.
 
 To better organize our code, we provide the context feature. You can pass namespace and directory data via Javascript chaining calls.
 
-For example, when you call `ctx.dir('xxx')` that `ctx` is a context element, it will return a new context with directory set to `xxx`. When you declare functions via the returned context, they will be created in folder `xxx`.
+For example, when you call `ctx.dir('xxx')` that `ctx` is a context, it will return a new context with directory set to `xxx`. When you declare functions via the returned context, they will be created in folder `xxx`.
+
+We also implement a event system depended on context, so you can easily set callbacks for succeful custom crafting attempts, for example.
 
 
 #### Recipe

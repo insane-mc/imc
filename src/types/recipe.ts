@@ -1,6 +1,6 @@
-import { Element, ElementMeta } from '../element'
-import { Context } from '../context'
 import { Item } from './item'
+import { Element, ElementMeta } from '../element'
+import { Context, BuildResult } from '../context'
 
 
 export type RecipeMaterial = Array<RecipeMaterial> | {
@@ -29,19 +29,21 @@ export interface RecipeMeta extends ElementMeta {
 	data?: RecipeData
 
 	name?: string
+	displayName?: string
 	recipe?: [
 		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
 		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
 		[RecipeMaterialMeta, RecipeMaterialMeta, RecipeMaterialMeta],
 	]
 	result?: string | Item | { item: string }
-	resultCount: number
+	resultCount?: number
 }
 
 
 export class Recipe extends Element {
 	data: RecipeData
-
+	displayName: string
+	private onCrafted?: Event
 
 	private static fromMaterialMeta(meta: RecipeMaterialMeta): RecipeMaterial {
 		if (typeof meta === 'string') {
@@ -55,9 +57,19 @@ export class Recipe extends Element {
 	}
 
 
-	compile() {
+	on(eventName: 'crafted'): Event {
+		if (eventName === 'crafted') {
+			if (!this.onCrafted) {
+				// this.onCrafted= this.ctx.event('')
+			}
+			return this.onCrafted
+		}
+		return
+	}
+
+	build(): BuildResult {
 		return {
-			dir: `data/${this.namespace}/recipes/${this.path}.json`,
+			path: `data/${this.namespace}/recipes/${this.path}.json`,
 			data: this.ctx.stringifyJSON(this.data),
 		}
 	}
@@ -68,6 +80,7 @@ export class Recipe extends Element {
 		this.type = 'recipe'
 
 		this.data.type = this.data.type || 'minecraft:crafting_shaped'
+		this.displayName = meta.displayName || this.name
 
 		if (this.data.type === 'minecraft:crafting_shaped') {
 			if (meta.recipe) {
