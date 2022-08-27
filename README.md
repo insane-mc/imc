@@ -28,20 +28,22 @@ See [API Document](#) for more syntax.
 
 ### Context
 
-To better organize our code, we provide the context feature. You can pass namespace and directory data via chaining calls.
+To better organize your code and JSON files, we provide the context feature, that to help you pass namespace, directory, or other data via chaining calls.
 
-For example, when you call `ctx.dir('xxx')` that `ctx` is a context, it will return a new context with directory set to `xxx`. When you declare functions via the returned context, they will be created in folder `xxx`.
+For example, when you call `ctx.dir('xxx')` that `ctx` is a context, it will return a new context with directory set to `xxx`. When you declare functions or recipes, for example, using the returned context, they will be created in folder `xxx`.
 
-We also implement a event system depended on context, so you can easily set callbacks for succeful custom crafting attempts, for example.
+We also implement a event system depended on context, to make you set callback functions or load/loop commands easily.
 
 
 ### Recipe
 
-Enjoy better custom crafting! You can now add recipes whose product contains NBT data, and even set the number of times limit for it. IMC will automatically convert it to Minecraft Datapacks for you.
+Enjoy better custom crafting! You can add recipes whose product contains NBT data, and even set the number of times limit for it. We will automatically convert it to datapacks through the advancement trick.
 
-We could even export all your recipes into a recipe book, then you could use commands to give it to other players.
+We could even pack all your recipes into a recipe book, then you could simply use commands to give it to other players.
 
 
 ### Advancement
 
-// TODO
+The advancement feature is basically the same as it in vanilla Minecraft Datapacks, except that it's easier to create callbacks via our event system.
+
+Of course, this is because our project is under development and we will bring more interesting features soon.
