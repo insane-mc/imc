@@ -1,7 +1,11 @@
-<img src="./assets/logo.png" align="center"/>
-<h2 align="center">IMC</h2>
-<p align="center">An <strong>I</strong>nsane <strong>M</strong>inecraft <strong>C</strong>ompiler for Building Datapacks</p>
+<p align="center">
+	<img align="center" src="./assets/logo.png">
+</p>
 <br>
+
+<img src="https://tokei.rs/b1/github/insane-mc/imc">
+
+## Introduction
 
 > This project is still under development, API interfaces may be unstable or not supported yet.
 
