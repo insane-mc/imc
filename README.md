@@ -1,9 +1,10 @@
 <br>
 <p align="center">
-	<img align="center" src="./assets/logo.png">
+	<img src="./assets/logo.png">
 </p>
-
-<img src="https://tokei.rs/b1/github/insane-mc/imc">
+<p align="center">
+	<img src="https://tokei.rs/b1/github/insane-mc/imc">
+</p>
 
 ## Introduction
 
