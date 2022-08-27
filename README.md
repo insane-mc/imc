@@ -1,3 +1,4 @@
+<img src="./assets/logo.png" align="center"/>
 <h2 align="center">IMC</h2>
 <p align="center">An <strong>I</strong>nsane <strong>M</strong>inecraft <strong>C</strong>ompiler for Building Datapacks</p>
 <br>
