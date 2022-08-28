@@ -10,7 +10,7 @@ inputs:
   target-branch:
     default: main
   commit-email:
-    default: memset0@outlook.com
+    default: imc@memset0.cn
   access-token:
     require: true
 
