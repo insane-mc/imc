@@ -42,6 +42,19 @@ jobs:
 
       - name: Build
         run: yarn build
+      
+      - name: Copy Files to Bot Profile
+        run: |
+          mkdir dist/bot-profile
+          cp README.md dist/bot-profile
+
+      - name: Commit to Bot Profile
+        uses: ./.github/actions/commit
+        with:
+          source: dist/bot-profile
+          target-user: imc-bot
+          target-repo: imc-bot
+          access-token: ${{ secrets.GH_ACCESS_TOKEN }}
 
       - name: Commit to 'datapack-hypixel-uhc'
         uses: ./.github/actions/commit
