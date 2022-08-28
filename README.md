@@ -1,20 +1,29 @@
 <br>
+
+<!-- header begin -->
 <p align="center">
 	<img src="./assets/logo.png">
 </p>
 <p align="center">
 	<img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat">
 	<img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat">
-	<img src="https://badge.fury.io/js/insane-mc.svg">
+	<a href="https://www.npmjs.com/package/insane-mc"><img src="https://badge.fury.io/js/insane-mc.svg"></a>
 	<img src="https://tokei.rs/b1/github/insane-mc/imc">
 	<img src="https://hits.dwyl.com/insane-mc/imc.svg?style=flat">
 </p>
+<!-- header end -->
 
 ## Introduction
 
 > This project is still under development, API interfaces may be unstable or not supported yet.
 
+[中文文档 Chinese Docs](https://imc.memset0.cn/)
 
+## Usage
+
+```shell
+npm install insane-mc
+```
 
 ## Supported Features
 
@@ -37,7 +46,7 @@ def tell($a) {
 
 What this code snippet does is make your datapack output `Hello, World!` each time it has loaded.
 
-See [API Document](#) for more syntax.
+See [API Document](https://imc.memset0.cn/syntax/) for more syntax.
 
 
 ### Context
