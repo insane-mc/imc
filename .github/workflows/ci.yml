@@ -41,3 +41,11 @@ jobs:
           source: dist/datapack-hypixel-uhc
           target-repo: datapack-hypixel-uhc
           access-token: ${{ secrets.GH_ACCESS_TOKEN }}
+      
+      - name: Dispatch CI of Documentation
+        uses: mvasigh/dispatch-action@main
+        with:
+          owner: insane-mc
+          repo: docs
+          token: ${{ secrets.GH_ACCESS_TOKEN }}
+          event_type: core-repo-push
