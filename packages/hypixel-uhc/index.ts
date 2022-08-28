@@ -486,7 +486,7 @@ ctx.on('load', 'tellraw @p ' + stringifyRawText([
 
 export async function build(ctx: Context) {
 	ctx.config('source', __dirname)
-	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc'))
+	ctx.config('dist', path.join(__dirname, '../../dist/datapack-hypixel-uhc'))
 	ctx.config('operation.build.copyReadme', true)
 	await ctx.build()
 }
