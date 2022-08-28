@@ -485,6 +485,8 @@ ctx.on('load', 'tellraw @p ' + stringifyRawText([
 ]))
 
 export async function build(ctx: Context) {
+	ctx.config('name', 'hypixel-uhc')
+	ctx.config('url', 'https://github.com/insane-mc/datapack-hypixel-uhc')
 	ctx.config('source', __dirname)
 	ctx.config('dist', path.join(__dirname, '../../dist/datapack-hypixel-uhc'))
 	ctx.config('operation.build.copyReadme', true)
