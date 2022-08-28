@@ -1,6 +1,6 @@
 {
   "name": "insane-mc",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "src/index.ts",
   "repository": "https://github.com/insane-mc/imc.git",
   "author": "memset0 <34177126+memset0@users.noreply.github.com>",
