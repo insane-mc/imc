@@ -4,7 +4,7 @@ Play Hypixel UHC Game via Minecraft Datapacks
 
 ### Usage
 
-Click `Download ZIP` and put it datapack to `.minecraft/saves/{{ your_map }}/datapacks` folder.
+Click `Download ZIP` and put this datapack to `.minecraft/saves/{{ your_map }}/datapacks` folder.
 
 ### Support Features
 
