@@ -3,8 +3,9 @@
   "version": "0.2.1",
   "main": "src/index.ts",
   "repository": "https://github.com/insane-mc/imc.git",
-  "author": "memset0 <34177126+memset0@users.noreply.github.com>",
-  "license": "AGPL 3.0",
+  "homepage": "https://imc.memset0.cn",
+  "author": "memset0 <memset0@outlook.com>",
+  "license": "AGPL-3.0-only",
   "scripts": {
     "test": "ts-node -r tsconfig-paths/register ./tests/index.ts"
   },
