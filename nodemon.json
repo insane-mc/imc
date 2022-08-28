@@ -1,0 +1,8 @@
+{
+  "execMap": {
+    "js": "node",
+    "ts": "ts-node -r tsconfig-paths/register"
+  },
+  "delay": 2000,
+  "ignore": ["node_modules/*", "dist/*", "assets/*", "*/assets/*"]
+}
