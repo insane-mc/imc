@@ -463,7 +463,7 @@ const giveRecipeBook = ctx.event({
 
 ctx.on('load', 'tellraw @p ' + stringifyRawText([
 	{ text: 'Datapack ' },
-	{ text: 'hypixel-uhc-recipe', bold: true, color: 'blue' },
+	{ text: 'hypixel-uhc', bold: true, color: 'blue' },
 	{ text: ' is loaded.\n' },
 	{ text: 'Click ' },
 	{
@@ -485,10 +485,9 @@ ctx.on('load', 'tellraw @p ' + stringifyRawText([
 ]))
 
 export async function build(ctx: Context) {
-	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc-recipe'))
-	await ctx.build()
-
-	ctx.config('dist', path.join('D:\\Game\\Minecraft\\.minecraft\\versions\\1.19 fabric\\saves\\imc-test\\datapacks', 'uhc-recipe'))
+	ctx.config('source', __dirname)
+	ctx.config('dist', path.join(__dirname, '../../dist/hypixel-uhc'))
+	ctx.config('operation.build.copyReadme', true)
 	await ctx.build()
 }
 build(ctx.root)

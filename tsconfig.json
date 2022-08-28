@@ -9,7 +9,7 @@
         "src/*"
       ],
       "@insane-mc/package-*": [
-        "packages/*/src"
+        "packages/*"
       ],
     },
     "strict": false,
