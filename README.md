@@ -2,11 +2,11 @@
 
 <!-- header begin -->
 <p align="center">
-	<img src="./assets/logo.png">
+	<img src="https://cdn.jsdelivr.net/gh/insane-mc/imc/assets/logo.png">
 </p>
 <p align="center">
 	<img src="https://img.shields.io/badge/build-passing-brightgreen.svg?style=flat">
-	<img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat">
+	<a href="https://github.com/insane-mc/imc/fork"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat"></a>
 	<a href="https://www.npmjs.com/package/insane-mc"><img src="https://badge.fury.io/js/insane-mc.svg"></a>
 	<img src="https://tokei.rs/b1/github/insane-mc/imc">
 	<img src="https://hits.dwyl.com/insane-mc/imc.svg?style=flat">
