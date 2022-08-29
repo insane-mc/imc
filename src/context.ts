@@ -93,7 +93,7 @@ export class Context {
 			cloneDeep(this.$preset)
 		)
 	}
-	
+
 	id(name: string, options?: ContextMethodIdOptions): NamespaceID {
 		options = options || {}
 
@@ -235,13 +235,13 @@ export class Context {
 
 
 export class ContextRoot extends Context {
-	$pool?: Array<NamespaceID>
-	$promises?: Array<ContextPromise>
-	$config?: Partial<Config>
+	$pool: Array<NamespaceID>
+	$promises: Array<ContextPromise>
+	$config: Partial<Config>
 	$event: {
 		[K in InternalEventName]?: Event
 	}
-	$data?: {
+	$data: {
 		[elementName in ElementName]?: {
 			[K: string]: ElementCollection[elementName]
 		}
@@ -259,6 +259,33 @@ export class ContextRoot extends Context {
 			pointer = pointer[keyList[i]]
 		}
 		pointer[keyList[keyList.length - 1]] = value
+	}
+
+	plugin(rhs: ContextRoot): ContextRoot {
+		this.$pool.push.apply(this.$pool, rhs.$pool)
+		this.$promises.push.apply(this.$promises, rhs.$promises)
+		this.$config = merge(this.$config, rhs.$config)
+		for (const eventName in rhs.$event) {
+			if (eventName in this.$event) {
+				this.$event[eventName].merge(rhs.$event[eventName])
+			} else {
+				this.$event[eventName] = rhs.$event[eventName]
+			}
+		}
+		for (const elementName in rhs.$data) {
+			if (elementName in this.$data) {
+				for (const elementId in rhs.$data[elementName]) {
+					if (elementId in this.$data[elementName]) {
+						this.logger.scope('plugin').warn('id conflicted:', elementId)
+					} else {
+						this.$data[elementName][elementId] = rhs.$data[elementName][elementId]
+					}
+				}
+			} else {
+				this.$data[elementName] = rhs.$data[elementName]
+			}
+		}
+		return this
 	}
 
 	async build(): Promise<void> {

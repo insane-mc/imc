@@ -17,7 +17,7 @@ export class Event extends Element {
 	callback: Array<EventCallbackMeta>
 
 
-	concat(another: Event): void {
+	merge(another: Event): void {
 		this.callback.push.apply(this.callback, another.callback)
 	}
 
