@@ -38,8 +38,8 @@ export interface ContextBuildResult {
 	data: string | Stream
 }
 
-
-export interface Config {
+export type Config = Partial<FullConfig>
+export interface FullConfig {
 	env: string,
 
 	name: string,
@@ -237,7 +237,7 @@ export class Context {
 export class ContextRoot extends Context {
 	$pool: Array<NamespaceID>
 	$promises: Array<ContextPromise>
-	$config: Partial<Config>
+	$config: Config
 	$event: {
 		[K in InternalEventName]?: Event
 	}
@@ -247,18 +247,23 @@ export class ContextRoot extends Context {
 		}
 	}
 
-
-	config(path: string, value: any): ContextRoot {
-		if (!this.isRoot) { throw new Error('method `config` could only be called at root node') }
-		const keyList = path.split('.')
-		let pointer: any = this.$config as any
-		for (let i = 0; i + 1 < keyList.length; i++) {
-			if (!(keyList[i] in pointer)) {
-				pointer[keyList[i]] = {}
+	config(config: Config): ContextRoot
+	config(path: string, value: any): ContextRoot
+	config(path: string | Config, value?: any): ContextRoot {
+		if (typeof path === 'string') {
+			if (!this.isRoot) { throw new Error('method `config` could only be called at root node') }
+			const keyList = path.split('.')
+			let pointer: any = this.$config as any
+			for (let i = 0; i + 1 < keyList.length; i++) {
+				if (!(keyList[i] in pointer)) {
+					pointer[keyList[i]] = {}
+				}
+				pointer = pointer[keyList[i]]
 			}
-			pointer = pointer[keyList[i]]
+			pointer[keyList[keyList.length - 1]] = value
+		} else {
+			this.$config = merge(this.$config, path as Config)
 		}
-		pointer[keyList[keyList.length - 1]] = value
 		return this
 	}
 

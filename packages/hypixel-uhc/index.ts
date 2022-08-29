@@ -6,10 +6,12 @@ import pluginRecipe from './recipe'
 
 const ctx = context().namespace('uhc')
 ctx.root
-	.config('name', 'hypixel-uhc')
-	.config('url', 'https://github.com/insane-mc/datapack-hypixel-uhc')
-	.config('source', __dirname)
-	.config('dist', path.join(__dirname, '../../dist/datapack-hypixel-uhc'))
+	.config({
+		name: 'hypixel-uhc',
+		url: 'https://github.com/insane-mc/datapack-hypixel-uhc',
+		source: __dirname,
+		dist: path.join(__dirname, '../../dist/datapack-hypixel-uhc'),
+	})
 	.config('operation.build.copyReadme', true)
 	.plugin(pluginRecipe)
 
