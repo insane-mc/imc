@@ -10,7 +10,7 @@
       ],
       "@insane-mc/package-*": [
         "packages/*"
-      ],
+      ]
     },
     "strict": false,
     "strictNullChecks": false,
@@ -22,10 +22,10 @@
     "incremental": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node"
   },
   "exclude": [
     "node_modules",
     "**/node_modules"
-  ],
+  ]
 }
