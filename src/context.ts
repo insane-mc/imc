@@ -248,7 +248,7 @@ export class ContextRoot extends Context {
 	}
 
 
-	config(path: string, value: any): void {
+	config(path: string, value: any): ContextRoot {
 		if (!this.isRoot) { throw new Error('method `config` could only be called at root node') }
 		const keyList = path.split('.')
 		let pointer: any = this.$config as any
@@ -259,6 +259,7 @@ export class ContextRoot extends Context {
 			pointer = pointer[keyList[i]]
 		}
 		pointer[keyList[keyList.length - 1]] = value
+		return this
 	}
 
 	plugin(rhs: ContextRoot): ContextRoot {

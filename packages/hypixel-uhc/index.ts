@@ -6,6 +6,11 @@ import pluginRecipe from './recipe'
 
 const ctx = context().namespace('uhc')
 ctx.root
+	.config('name', 'hypixel-uhc')
+	.config('url', 'https://github.com/insane-mc/datapack-hypixel-uhc')
+	.config('source', __dirname)
+	.config('dist', path.join(__dirname, '../../dist/datapack-hypixel-uhc'))
+	.config('operation.build.copyReadme', true)
 	.plugin(pluginRecipe)
 
 const recipeBook = ctx.item(merge(generateRecipeBook(Object.values(ctx.root.$data?.recipe || [])), {
@@ -41,12 +46,4 @@ ctx.on('load', 'tellraw @p ' + stringifyRawText([
 	{ text: ' to get the recipe book.\n' }
 ]))
 
-export async function build(ctx: ContextRoot) {
-	ctx.config('name', 'hypixel-uhc')
-	ctx.config('url', 'https://github.com/insane-mc/datapack-hypixel-uhc')
-	ctx.config('source', __dirname)
-	ctx.config('dist', path.join(__dirname, '../../dist/datapack-hypixel-uhc'))
-	ctx.config('operation.build.copyReadme', true)
-	await ctx.build()
-}
-build(ctx.root)
+ctx.root.build()
