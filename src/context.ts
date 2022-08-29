@@ -14,9 +14,18 @@ import { Item, ItemMeta } from './modules/item'
 import { Recipe, RecipeMeta } from './modules/recipe'
 
 
+export type ContextPromiseResolve = (ctx: Context | PromiseLike<Context>) => void
+export type ContextPromiseReject = (err: Error) => void
 export interface ContextPromise {
-	resolve: (ctx: Context) => {}
-	reject: (err: Error) => {}
+	resolve: ContextPromiseResolve
+	reject: ContextPromiseReject
+	current: Context,
+	requirement: Array<string>
+}
+
+export interface ContextPreset {
+	macro: { [K: string]: any }
+	data: { [K: string]: any }
 }
 
 export interface ContextMethodIdOptions {
@@ -24,7 +33,7 @@ export interface ContextMethodIdOptions {
 	spec?: string
 }
 
-export interface BuildResult {
+export interface ContextBuildResult {
 	path: string
 	data: string | Stream
 }
@@ -55,34 +64,20 @@ export interface Config {
 }
 
 
+
 export class Context {
 	logger: Logger
-
-	$config?: Partial<Config>
-	$pool?: Array<NamespaceID>
-	$promises?: Array<ContextPromise>
-	$event: {
-		[K in InternalEventName]?: Event
-	}
-	$data?: {
-		[elementName in ElementName]?: {
-			[K: string]: ElementCollection[elementName]
-		}
-	}
+	isRoot: boolean
+	root: ContextRoot
 
 	$namespace: Array<string>
 	$dir: Array<string>
-	$declaration: {
-		// require: Array<string>
-		macro: { [K: string]: any }
-		data: { [K: string]: any }
-	}
+	$preset: ContextPreset
 
 
+	// utils
 
-	// Utils
-
-	stringifyJSON(data) {
+	stringifyJSON(data: any) {
 		if (this.root.$config.env === 'PRODUCEMENT') {
 			return JSON.stringify(data)
 		} else {
@@ -90,50 +85,15 @@ export class Context {
 		}
 	}
 
-
-
-	// Basic Methods
-
-	isRoot: boolean
-	root: Context
-
 	clone(): Context {
-		const cloned = new Context(false)
-		cloned.root = this.root
-		cloned.isRoot = false
-		cloned.$declaration = cloneDeep(this.$declaration)
-		cloned.$namespace = cloneDeep(this.$namespace)
-		cloned.$dir = cloneDeep(this.$dir)
-		return cloned
+		return new Context(
+			this.root,
+			cloneDeep(this.$namespace),
+			cloneDeep(this.$dir),
+			cloneDeep(this.$preset)
+		)
 	}
-
-	config(path: string, value: any): void {
-		if (!this.isRoot) { throw new Error('method `config` could only be called at root node') }
-		const keyList = path.split('.')
-		let pointer: any = this.$config as any
-		for (let i = 0; i + 1 < keyList.length; i++) {
-			if (!(keyList[i] in pointer)) {
-				pointer[keyList[i]] = {}
-			}
-			pointer = pointer[keyList[i]]
-		}
-		pointer[keyList[keyList.length - 1]] = value
-	}
-
-
-
-	// Exposed Methods
-
-	// require(declaration: string, additional?: string): Promise<Context> {
-	// 	if (additional) {
-	// 		// treat `declaration` as `type`, `additional` as `name`
-	// 		declaration = declaration + '::' + additional
-	// 	}
-	// 	const cloned = this.clone()
-	// 	cloned.$declaration.require.push(declaration)
-	// 	return cloned
-	// }
-
+	
 	id(name: string, options?: ContextMethodIdOptions): NamespaceID {
 		options = options || {}
 
@@ -159,44 +119,62 @@ export class Context {
 				path.push.apply(path, name.split('/'))
 			}
 		}
-
 		// this.logger.scope('id').debug(name, namespace, path, options)
 		return namespace.join('.') + ':' + path.join(options.flat ? '___' : '/')
+	}
+
+
+	// methods
+
+	require(requirement: string | Array<string>): Promise<Context> {
+		if (typeof requirement === 'string') { requirement = [requirement] }
+		return new Promise((resolve: ContextPromiseResolve, reject: ContextPromiseReject) => {
+			this.root.$promises.push({
+				resolve,
+				reject,
+				current: this.clone(),
+				requirement: requirement as Array<string>,
+			})
+		})
 	}
 
 	namespace(value: string | Array<string>, options?: any): Context {
 		options = merge({ replace: false }, options || {})
 		if (typeof value === 'string') { value = value.split('.') as Array<string> }
-		const cloned = this.clone()
-		cloned.$namespace = [...(options.replace ? [] : this.$namespace), ...value]
-		cloned.logger = new Logger(cloned.$namespace, cloned.$dir)
-		return cloned
+		return new Context(
+			this.root,
+			[...(options.replace ? [] : this.$namespace), ...value],
+			cloneDeep(this.$dir),
+			cloneDeep(this.$preset)
+		)
 	}
 
 	dir(value: string | Array<string>, options?: any): Context {
 		options = merge({ replace: false }, options || {})
 		if (typeof value === 'string') { value = value.split('/') as Array<string> }
-		const cloned = this.clone()
-		cloned.$dir = [...(options.replace ? [] : this.$namespace), ...value]
-		cloned.logger = new Logger(cloned.$namespace, cloned.$dir)
-		return cloned
+		return new Context(
+			this.root,
+			cloneDeep(this.$namespace),
+			[...(options.replace ? [] : this.$dir), ...value],
+			cloneDeep(this.$preset)
+		)
 	}
 
 	macro(name: string, value: string) {
 		const cloned = this.clone()
-		cloned.$declaration.macro[name] = value
+		cloned.$preset.macro[name] = value
 		return cloned
 	}
 
-	// use(another: Context): void {
-	// }
+
+	// declare
 
 	get(type: string, name?: string): any {
 		if (!name) {
 			[type, name] = type.split('::', 1)
 		}
 		if (type === 'macro') {
-			return this.$declaration.macro[name]
+			return this.$preset.macro[name]
 		}
 		return this.root.$data[type]?.[name] || null
 	}
@@ -214,170 +192,212 @@ export class Context {
 		return element
 	}
 
-
-
-	// Element Operations
-
 	recipe(meta: string | RecipeMeta) { return this.declare('recipe', meta, Recipe) }
 	event(meta: string | EventMeta) { return this.declare('event', meta, Event) }
 	item(meta: string | ItemMeta) { return this.declare('item', meta, Item) }
 	advancement(meta: string | AdvancementMeta) { return this.declare('advancement', meta, Advancement) }
 
 
+	// event
 
-	// Event Operations
-
-	private onInternal(eventName: InternalEventName, callback?: EventCallback): Event | Context {
-		if (!this.isRoot) { return this.root.on(eventName, callback) }
-		if (!(eventName in this.$event)) {
-			this.$event[eventName] = InternalEventFactory[eventName](this)
+	private onInternalEvent(eventName: InternalEventName, callback?: EventCallback): Event | Context {
+		if (!(eventName in this.root.$event)) {
+			this.root.$event[eventName] = InternalEventFactory[eventName](this.root)
 			if (!this.root.$data.event) { this.root.$data.event = {} }
-			this.$data.event[this.$event[eventName].id] = this.$event[eventName]
+			this.root.$data.event[this.root.$event[eventName].id] = this.root.$event[eventName]
 		}
 		if (callback) {
-			this.$event[eventName].trigger(callback)
+			this.root.$event[eventName].trigger(callback)
 			return this
 		} else {
-			return this.$event[eventName]
+			return this.root.$event[eventName]
 		}
 	}
 
 	on(eventName: string, callback?: EventCallback): Event | Context {
 		// this.logger.debug(eventName, callback, (eventName in Object.keys(InternalEventFactory)))
 		if (Object.keys(InternalEventFactory).includes(eventName)) {
-			return this.onInternal(eventName as InternalEventName, callback)
+			return this.onInternalEvent(eventName as InternalEventName, callback)
 		}
 		return this
 	}
 
-
-
-	// Build Process
-
-	async build(): Promise<void> {
-		if (!this.isRoot) { throw new Error('method `build` could only be called at root node') }
-		if (!this.$config.dist) { throw new Error('config `dist` is required()') }
-
-		const logger = this.logger.scope('build')
-		logger.info('building to', this.$config.dist)
-
-		const copyFile = async (source: string, target: string): Promise<void> => {
-			const dir = path.join(this.$config.dist, target)
-			const stream = await fs.promises.readFile(source)
-			await fs.promises.mkdir(path.dirname(dir), { recursive: true })
-			await fs.promises.writeFile(dir, stream)
-		}
-
-		const writeFile = async (dir: string, data: string | Stream) => {
-			dir = path.join(this.$config.dist, dir)
-			await fs.promises.mkdir(path.dirname(dir), { recursive: true })
-			await fs.promises.writeFile(dir, data)
-		}
-
-		const packMeta: any = {}
-		packMeta.__info__ = 'This datapack is generated by Insane Minecraft Compiler. Visit https://github.com/insane-mc/imc for more information.'
-		if (this.$config.name) { packMeta.__name__ = this.$config.name }
-		if (this.$config.url) { packMeta.__url__ = this.$config.url }
-		if (this.$config.packMeta?.comment) {
-			for (const key in this.$config.packMeta?.comment) {
-				packMeta[`__${key}__`] = this.$config.packMeta?.comment[key]
-			}
-		}
-		packMeta.pack = {
-			pack_format: this.$config.packMeta?.pack_format || 6,
-			description: this.$config.description || 'A datapack generated by Insane Minecraft Compiler.',
-		}
-		if (this.$config.packMeta?.filter) { packMeta.filter = this.$config.packMeta?.filter }
-
-		// await fs.promises.rm(this.$config.dist, { recursive: true, force: true })
-		const promises = []
-		promises.push(writeFile('pack.mcmeta', this.stringifyJSON(packMeta)))
-		promises.push(writeFile('data/minecraft/tags/functions/tick.json', this.stringifyJSON({
-			values: ["imc:tick"]
-		})))
-		promises.push(writeFile('data/minecraft/tags/functions/load.json', this.stringifyJSON({
-			values: ["imc:load"]
-		})))
-		for (const type in this.$data) {
-			for (const id in this.$data[type]) {
-				const element = this.$data[type][id]
-				if (!element.build) { continue }
-				const result: BuildResult = element.build()
-				// this.logger.scope('build').info(id, result.path)
-				promises.push(writeFile(result.path, result.data))
-			}
-		}
-
-		if (this.$config.operation?.build) {
-			if (this.$config.operation.build.copyReadme) {
-				promises.push(copyFile(path.join(this.$config.source, 'README.md'), 'README.md'))
-			}
-		}
-
-		await Promise.all(promises)
-		logger.info('done')
-
-		// const queue: Array<Context> = []
-		// const rest: Array<[number, Context]> = []
-		// const satisfy: { [R: string]: Array<number> } = {}
-
-		// for (const subctx of this.$queue) {
-		// 	const requirements = uniq(subctx.$declaration.require)
-		// 	if (requirements.length) {
-		// 		for (const requirement of requirements) {
-		// 			satisfy[requirement] = satisfy[requirement] || []
-		// 			satisfy[requirement].push(rest.length)
-		// 		}
-		// 		rest.push([requirements.length, subctx])
-		// 	} else {
-		// 		queue.push(subctx)
-		// 	}
-		// }
-
-		// let pointer = 0
-		// let tracker = 0
-		// while (pointer < queue.length) {
-		// 	pointer += 1
-		// 	while (tracker < this.$pool.length) {
-		// 		if (this.$pool[tracker] in satisfy) {
-		// 			for (const task of satisfy[this.$pool[tracker]]) {
-		// 				rest[task][0] -= 1
-		// 				if (rest[task][0] === 0) {
-		// 					queue.push(rest[task][1])
-		// 				}
-		// 			}
-		// 		}
-		// 		tracker += 1
-		// 	}
-		// }
-
-		// if (queue.length !== this.$queue.length) {
-		// 	throw new Error('Build failed: some requirement could not be satisfied.')
-		// }
-	}
-
-
-	constructor(isRoot = true) {
-		if (isRoot) {
-			this.isRoot = true
-			this.root = this
-
-			this.$config = {}
-			this.$pool = []
-			this.$data = {}
-			this.$event = {}
-
-			this.$namespace = []
-			this.$dir = []
-			this.$declaration = {
-				macro: {},
-				data: {},
-			}
-
-		} else {
-			this.isRoot = false
-		}
-
+	constructor(root?: ContextRoot, namespace?: Array<string>, dir?: Array<string>, preset?: ContextPreset) {
+		this.isRoot = false
+		if (root) { this.root = root }
+		if (namespace) { this.$namespace = namespace }
+		if (dir) { this.$dir = dir }
+		if (preset) { this.$preset = preset }
 		this.logger = new Logger(this.$namespace, this.$dir)
 	}
+}
+
+
+
+export class ContextRoot extends Context {
+	$pool?: Array<NamespaceID>
+	$promises?: Array<ContextPromise>
+	$config?: Partial<Config>
+	$event: {
+		[K in InternalEventName]?: Event
+	}
+	$data?: {
+		[elementName in ElementName]?: {
+			[K: string]: ElementCollection[elementName]
+		}
+	}
+
+
+	config(path: string, value: any): void {
+		if (!this.isRoot) { throw new Error('method `config` could only be called at root node') }
+		const keyList = path.split('.')
+		let pointer: any = this.$config as any
+		for (let i = 0; i + 1 < keyList.length; i++) {
+			if (!(keyList[i] in pointer)) {
+				pointer[keyList[i]] = {}
+			}
+			pointer = pointer[keyList[i]]
+		}
+		pointer[keyList[keyList.length - 1]] = value
+	}
+
+	async build(): Promise<void> {
+		if (!this.$config.dist) { throw new Error('config `dist` is required()') }
+		return await buildContext(this)
+	}
+
+
+	constructor() {
+		super()
+		this.isRoot = true
+		this.root = this
+		this.$namespace = []
+		this.$dir = []
+		this.$preset = {
+			macro: {},
+			data: {},
+		}
+
+		this.$pool = []
+		this.$promises = []
+		this.$config = {}
+		this.$event = {}
+		this.$data = {}
+	}
+}
+
+
+
+export async function buildContext(ctx: ContextRoot): Promise<void> {
+	const logger = ctx.logger.scope('build')
+	logger.info('building to', ctx.$config.dist)
+
+	const queue: Array<ContextPromise> = []
+	const rest: Array<[number, ContextPromise]> = []
+	const satisfy: { [R: string]: Array<number> } = {}
+
+	let promiseTracker = 0
+	let dataTracker = 0
+	let pointer = 0
+
+	while (promiseTracker < ctx.$promises.length) {
+		const promise = ctx.$promises[promiseTracker++]
+		const requirements = uniq(promise.requirement)
+		if (requirements.length) {
+			for (const requirement of requirements) {
+				satisfy[requirement] = satisfy[requirement] || []
+				satisfy[requirement].push(rest.length)
+			}
+			rest.push([requirements.length, promise])
+		} else {
+			queue.push(promise)
+		}
+
+		while (pointer < queue.length) {
+			const promise = queue[pointer++]
+			promise.resolve(promise.current)
+
+			while (dataTracker < ctx.$pool.length) {
+				const name = ctx.$pool[dataTracker++]
+
+				if (name in satisfy) {
+					for (const task of satisfy[name]) {
+						rest[task][0] -= 1
+						if (rest[task][0] === 0) {
+							queue.push(rest[task][1])
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for (const i in rest) {
+		if (rest[i][0] > 0) {
+			logger.error(`task #${i} would not be satisfied, last ${rest[i][0]}:`, rest[i][1])
+			throw new Error('Build failed: some requirements could not be satisfied.')
+		}
+	}
+
+	const copyFile = async (source: string, target: string): Promise<void> => {
+		const dir = path.join(ctx.$config.dist, target)
+		const stream = await fs.promises.readFile(source)
+		await fs.promises.mkdir(path.dirname(dir), { recursive: true })
+		await fs.promises.writeFile(dir, stream)
+	}
+
+	const writeFile = async (dir: string, data: string | Stream) => {
+		dir = path.join(ctx.$config.dist, dir)
+		await fs.promises.mkdir(path.dirname(dir), { recursive: true })
+		await fs.promises.writeFile(dir, data)
+	}
+
+	const packMeta: any = {}
+	packMeta.__info__ = 'This datapack is generated by Insane Minecraft Compiler. Visit https://github.com/insane-mc/imc for more information.'
+	if (ctx.$config.name) { packMeta.__name__ = ctx.$config.name }
+	if (ctx.$config.url) { packMeta.__url__ = ctx.$config.url }
+	if (ctx.$config.packMeta?.comment) {
+		for (const key in ctx.$config.packMeta?.comment) {
+			packMeta[`__${key}__`] = ctx.$config.packMeta?.comment[key]
+		}
+	}
+	packMeta.pack = {
+		pack_format: ctx.$config.packMeta?.pack_format || 6,
+		description: ctx.$config.description || 'A datapack generated by Insane Minecraft Compiler.',
+	}
+	if (ctx.$config.packMeta?.filter) { packMeta.filter = ctx.$config.packMeta?.filter }
+
+	// await fs.promises.rm(ctx.$config.dist, { recursive: true, force: true })
+	const promises = []
+	promises.push(writeFile('pack.mcmeta', ctx.stringifyJSON(packMeta)))
+	promises.push(writeFile('data/minecraft/tags/functions/tick.json', ctx.stringifyJSON({
+		values: ["imc:tick"]
+	})))
+	promises.push(writeFile('data/minecraft/tags/functions/load.json', ctx.stringifyJSON({
+		values: ["imc:load"]
+	})))
+	for (const type in ctx.$data) {
+		for (const id in ctx.$data[type]) {
+			const element = ctx.$data[type][id]
+			if (!element.build) { continue }
+			const result: ContextBuildResult = element.build()
+			// ctx.logger.scope('build').info(id, result.path)
+			promises.push(writeFile(result.path, result.data))
+		}
+	}
+
+	if (ctx.$config.operation?.build) {
+		if (ctx.$config.operation.build.copyReadme) {
+			promises.push(copyFile(path.join(ctx.$config.source, 'README.md'), 'README.md'))
+		}
+	}
+
+	await Promise.all(promises)
+	logger.info('done')
+}
+
+
+
+export function context(): ContextRoot {
+	return new ContextRoot()
 }

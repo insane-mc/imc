@@ -1,9 +1,9 @@
-import { Context, stringifyRawText, generateRecipeBook } from 'insane-mc'
+import { Context, ContextRoot, context, stringifyRawText, generateRecipeBook } from 'insane-mc'
 import { merge } from 'lodash'
 import path from 'path'
 
 
-const ctx = (new Context())
+const ctx = context()
 	.namespace('uhc.recipe')
 
 // Apprentice Helmet
@@ -484,7 +484,7 @@ ctx.on('load', 'tellraw @p ' + stringifyRawText([
 	{ text: ' to get the recipe book.\n' }
 ]))
 
-export async function build(ctx: Context) {
+export async function build(ctx: ContextRoot) {
 	ctx.config('name', 'hypixel-uhc')
 	ctx.config('url', 'https://github.com/insane-mc/datapack-hypixel-uhc')
 	ctx.config('source', __dirname)

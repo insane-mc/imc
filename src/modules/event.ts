@@ -1,5 +1,5 @@
 import { Element, ElementMeta } from '../element'
-import { Context, BuildResult } from '../context'
+import { Context, ContextBuildResult } from '../context'
 
 
 export interface EventCallbackMeta {
@@ -49,7 +49,7 @@ export class Event extends Element {
 		}).join('\n\n')
 	}
 
-	build(): BuildResult {
+	build(): ContextBuildResult {
 		return {
 			path: `data/${this.namespace}/functions/${this.path}.mcfunction`,
 			data: this.compile(),

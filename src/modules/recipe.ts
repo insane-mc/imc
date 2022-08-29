@@ -5,7 +5,7 @@ import { Event } from './event'
 import { Advancement } from './advancement'
 import { stringifyRawText } from '../types'
 import { Element, ElementMeta } from '../element'
-import { Context, BuildResult } from '../context'
+import { Context, ContextBuildResult } from '../context'
 
 
 export type RecipeMaterial = Array<RecipeMaterial> | {
@@ -114,7 +114,7 @@ export class Recipe extends Element {
 		return
 	}
 
-	build(): BuildResult {
+	build(): ContextBuildResult {
 		return {
 			path: `data/${this.namespace}/recipes/${this.path}.json`,
 			data: this.ctx.stringifyJSON(this.data),

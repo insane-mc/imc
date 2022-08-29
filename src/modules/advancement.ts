@@ -1,7 +1,7 @@
 import { Predicate } from './predicate'
 import { RawText, NamespaceID } from '../types'
 import { Element, ElementMeta } from '../element'
-import { Context, BuildResult } from '../context'
+import { Context, ContextBuildResult } from '../context'
 
 
 export interface AdvancementCondition {
@@ -51,7 +51,7 @@ export class Advancement extends Element {
 	data: AdvancementData
 
 
-	build(): BuildResult {
+	build(): ContextBuildResult {
 		return {
 			path: `data/${this.namespace}/advancements/${this.path}.json`,
 			data: this.ctx.stringifyJSON(this.data),
