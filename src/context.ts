@@ -11,7 +11,9 @@ import { ElementMeta, ElementCreater, ElementName, ElementCollection } from './e
 import { Advancement, AdvancementMeta } from './modules/advancement'
 import { Event, EventMeta } from './modules/event'
 import { Item, ItemMeta } from './modules/item'
+import { Mcfunction, McfunctionMeta } from './modules/mcfunction'
 import { Recipe, RecipeMeta } from './modules/recipe'
+import { Script, ScriptMeta } from './modules/script'
 
 
 export type ContextPromiseResolve = (ctx: Context | PromiseLike<Context>) => void
@@ -192,10 +194,12 @@ export class Context {
 		return element
 	}
 
-	recipe(meta: string | RecipeMeta) { return this.declare('recipe', meta, Recipe) }
+	advancement(meta: string | AdvancementMeta) { return this.declare('advancement', meta, Advancement) }
 	event(meta: string | EventMeta) { return this.declare('event', meta, Event) }
 	item(meta: string | ItemMeta) { return this.declare('item', meta, Item) }
-	advancement(meta: string | AdvancementMeta) { return this.declare('advancement', meta, Advancement) }
+	mcfunction(meta: string | McfunctionMeta) { return this.declare('mcfunction', meta, Mcfunction) }
+	recipe(meta: string | RecipeMeta) { return this.declare('recipe', meta, Recipe) }
+	script(meta: string | ScriptMeta) { return this.declare('script', meta, Script) }
 
 
 	// event

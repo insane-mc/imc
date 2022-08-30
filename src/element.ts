@@ -69,13 +69,17 @@ export type ElementCreater<T extends Element> = { new(meta: any, ctx: Context): 
 import { Advancement, AdvancementMeta } from './modules/advancement'
 import { Event, EventMeta } from './modules/event'
 import { Item, ItemMeta } from './modules/item'
+import { Mcfunction, McfunctionMeta } from './modules/mcfunction'
 import { Recipe, RecipeMeta } from './modules/recipe'
+import { Script, ScriptMeta } from './modules/script'
 
 export class ElementCollection {
 	advancement: Advancement
 	event: Event
 	item: Item
 	recipe: Recipe
+	script: Script
+	mcfunction: Mcfunction
 }
 
 export class ElementMetaCollection {
@@ -83,6 +87,8 @@ export class ElementMetaCollection {
 	event: EventMeta
 	item: ItemMeta
 	recipe: RecipeMeta
+	script: ScriptMeta
+	mcfunction: McfunctionMeta
 }
 
 export type ElementName = keyof ElementCollection
