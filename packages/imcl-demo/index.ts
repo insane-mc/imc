@@ -6,6 +6,8 @@ const ctx = context()
 		name: 'imcl-demo',
 		url: 'https://github.com/insane-mc/demo-imc-lang',
 		source: __dirname,
-		dist: path.join(__dirname, '../../dist/demo-imc-lang'),
+		dist: path.join(process.env.IMC_TEST_MAP || path.join(__dirname, '../../dist'), 'demo-imc-lang')
 	})
-	.script('main.imcl')
+
+ctx.script({path: 'main.imcl'})
+ctx.root.build()

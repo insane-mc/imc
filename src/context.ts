@@ -232,7 +232,7 @@ export class Context {
 		if (namespace) { this.$namespace = namespace }
 		if (dir) { this.$dir = dir }
 		if (preset) { this.$preset = preset }
-		this.logger = new Logger(this.$namespace, this.$dir)
+		this.logger = new Logger('', this.$namespace, this.$dir)
 	}
 }
 

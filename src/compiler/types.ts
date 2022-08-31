@@ -13,20 +13,28 @@ export interface CompileResult {
 
 
 
-export type tokenName =
-	'if' |
-	'for' |
-	'while' |
-	'def' |
-	'macro' |
-	'function' |
-	'namespace' |
-	'dir'
+export enum Token {
+	// internal
+	space,
+	space_newline,
+	space_internal,
+	name,
+	number,
+	command,
+	integer,
+	params,
+	condition,
+	statement,
 
-export interface ASTNode {
-	type: string
-	context: Context
-	token: IMCLToken
-	next?: ASTNode
-	children?: Array<ASTNode>
+	// expression
+	namespace,
+	dir,
+	if,
+	for,
+	while,
+	function,
+	decorator,
+
+	// call
+	call_function,
 }

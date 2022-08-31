@@ -1,32 +1,19 @@
 import { merge } from 'lodash'
 
-import { ASTNode, CompileOptions } from "./types"
+import { ASTNode } from './handler'
+import { Context } from '../context'
+import { Token, CompileOptions } from "./types"
 
-
-export enum Token {
-	space,
-	space_newline,
-	space_internal,
-	number,
-	integer,
-	variable,
-	condition,
-	statement,
-
-	// internal
-	namespace,
-	dir,
-	if,
-	for,
-	while,
-}
 
 export const TokenExpression = {
-	[Token.namespace]: 'namespace <:statement>',
-	[Token.dir]: 'dir <:statement>',
+	[Token.namespace]: 'namespace <:name> <:statement>',
+	[Token.dir]: 'dir <:name> <:statement>',
 	[Token.if]: 'if <:condition> <:statement> ( | else <else-statement:statement>)',
-	[Token.for]: 'for <:variable><l:space>in<r:space><integer>...<integer> <statement>',
-	[Token.while]: 'while( | <space>async) <condition> <statement>',
+	[Token.for]: 'for <:name><space>in<space><l:integer>...<r:integer> <statement>',
+	[Token.while]: 'while( | <space>async) <:condition> <:statement>',
+	[Token.function]: 'function <:name> <:params> <:statement>'
+	// [Token.decorator]: '@<decoratorName:name><params> <statement>',
+	// [Token.call_function]: '$<functionName:name><params>',
 }
 
 export const LeftBracket = ['(', '[', '{']
@@ -35,43 +22,59 @@ export const RightBracket = [')', ']', '}']
 interface Eat {
 	found: boolean
 	result?: number
-	data?: { [K: string]: [number, number] }
+	match?: { [K: string]: [number, number] }
+	children?: { [K: string]: Array<ASTNode> }
 }
 
 export class IMCLLexer {
-	source: string
+	root: Array<ASTNode>
+	ctx: Context
+
+	constructor(
+		public source: string,
+		public option: CompileOptions,
+	) {
+		this.ctx = option.context || new Context()
+		this.root = this.parse(0, source.length)
+	}
 
 	private eat(type: Token, start: number, limit: number): Eat {
+		this.ctx.logger.scope('lexer.eat').info(Token[type], start, limit)
 		if (type as number === -1) { throw new Error('[Internal] Lexer: Type out of bound.') }
 		const notfound = { found: false } as const
 
-		const parsePattern = (pattern: string): [string, string] => {
-			const patternType = pattern.match(':') ? pattern.split(':', 2)[1] : pattern
-			const patternName = pattern.match(':') ? (pattern[0] === ':' ? patternType : pattern.split(':', 2)[0]) : null
-			return [patternType, patternName]
-		}
 		const matchExpression = (expression: string, start: number, limit: number): Eat => {
-			let i = start, j = 0, data = {}
+			this.ctx.logger.scope('lexer.eat').info('matchExpression', expression, start, limit)
+			let i = start, j = 0, match = {}, children = {}
+			const handlePattern = (pattern: string, next: number): boolean => {
+				const patternType = pattern.match(':') ? pattern.split(':', 2)[1] : pattern
+				const patternName = pattern.match(':') ? (pattern[0] === ':' ? patternType : pattern.split(':', 2)[0]) : null
+				const tried = this.eat(Object.values(Token).indexOf(patternType) as Token, i, limit)
+				if (!tried.found) { return false }
+				if (tried.match) { match = merge(match, tried.match) }
+				if (patternName) {
+					match[patternName] = [i, tried.result]
+					if (patternType === 'statement') {
+						children[patternName] = this.parse(match[patternName][0] + 1, match[patternName][1] - 1)
+					}
+				}
+				i = tried.result
+				j = next
+				return true
+			}
 			while (j < expression.length) {
+				this.ctx.logger.scope('lexer.eat').info('>>', i, j, [this.source.slice(i, limit), expression.slice(j)])
 				if (expression[j] === '<') {
-					const pattern = expression.slice(j + 1, expression.indexOf('>', j + 1))
-					const [patternType, patternName] = parsePattern(pattern)
-					const tried = this.eat(Object.values(Token).indexOf(patternType) as Token, i, limit)
-					if (!tried.found) { return notfound }
-					data = merge(data, tried.data, { [patternName]: [i, tried.result] })
-					i = tried.result
-					j = expression.indexOf('>', j + 1) + 1
+					const matching = expression.indexOf('>', j + 1)
+					const pattern = expression.slice(j + 1, matching)
+					if (!handlePattern(pattern, matching + 1)) { return notfound }
 				} else if (expression[j] === '(') {
-					const patterns = expression.slice(j + 1, expression.indexOf(')', j + 1)).split(/\s*\|\s*/g)
+					const matching = expression.indexOf(')', j + 1)
+					const patterns = expression.slice(j + 1, matching).split(/\s*\|\s*/g)
 					let found = false
 					for (const pattern of patterns) {
-						const [patternType, patternName] = parsePattern(pattern)
-						const tried = this.eat(Object.values(Token).indexOf(patternType) as Token, i, limit)
-						if (!tried.found) { continue }
+						if (!handlePattern(pattern, matching)) { continue }
 						found = true
-						data = merge(data, tried.data, { [patternName]: [i, tried.result] })
-						i = tried.result
-						j = expression.indexOf(')', j + 1) + 1
 					}
 					if (!found) { return notfound }
 				} else if (expression[j] === ' ') {
@@ -81,7 +84,10 @@ export class IMCLLexer {
 					i++, j++
 				}
 			}
-			return { found: true, result: i, data: data }
+			const returned: Eat = { found: true, result: i }
+			if (Object.keys(match).length) { returned.match = match }
+			if (Object.keys(children).length) { returned.children = children }
+			return returned
 		}
 		if (type in TokenExpression) {
 			return matchExpression(TokenExpression[type], start, limit)
@@ -134,6 +140,7 @@ export class IMCLLexer {
 							i++
 						}
 					}
+					i++
 				}
 				return { found: true, result: i }
 			}
@@ -160,32 +167,46 @@ export class IMCLLexer {
 				while (i < limit && this.source[i].match(/[0-9]/)) { i++ }
 				return i === start ? notfound : { found: true, result: i }
 			}
-			case Token.variable: {
+			case Token.name: {
 				if (!this.source[i].match(/[a-zA-Z_]/)) { return notfound }
 				i++
 				while (i < limit && this.source[i].match(/[a-zA-Z0-9_]/)) { i++ }
 				return i === start ? notfound : { found: true, result: i }
 			}
-			case Token.condition: {
-				return matchBracket('(', ')')
-			}
-			case Token.statement: {
-				return matchBracket('{', '}')
-			}
+			case Token.params: { return matchBracket('(', ')') }
+			case Token.condition: { return matchBracket('(', ')') }
+			case Token.statement: { return matchBracket('{', '}') }
 		}
 		throw new Error(`[Internal] Lexer: Unknown type ${Token[type]}`)
 	}
 
-	private parse(l: number, r: number) {
+	private parse(l: number, r: number): Array<ASTNode> {
+		this.ctx.logger.scope('lexer.parse').info(l, r)
+		const segment = [] as Array<ASTNode>
 		while (l < r) {
 			if (this.source[l].match(/\s/)) {
-				l = this.eat(Token.space_newline, l, r)[1]
-				//TODO
+				l = this.eat(Token.space_newline, l, r).result
+				if (l >= r) { break }
+			}
+			let found = false
+			for (const key in TokenExpression) {
+				const token = (+key) as Token
+				const result = this.eat(token, l, r)
+				// this.ctx.logger.scope('lexer.parse').debug(l, token, Token[token], result)
+				if (result.found) {
+					segment.push(new ASTNode(token, [l, result.result], result.match, result.children))
+					l = result.result
+					found = true
+					break
+				}
+			}
+			if (!found) {
+				let e = this.source.indexOf('\n', l + 1)
+				if (e === -1 || e > r) { e = r }
+				segment.push(new ASTNode(Token.command, [l, e]))
+				l = e
 			}
 		}
-	}
-
-	constructor(source: string, option: CompileOptions) {
-		this.parse(0, source.length)
+		return segment
 	}
 }

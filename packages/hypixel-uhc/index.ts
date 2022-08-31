@@ -10,7 +10,7 @@ ctx.root
 		name: 'hypixel-uhc',
 		url: 'https://github.com/insane-mc/datapack-hypixel-uhc',
 		source: __dirname,
-		dist: path.join(__dirname, '../../dist/datapack-hypixel-uhc'),
+		dist: path.join(process.env.IMC_TEST_MAP || path.join(__dirname, '../../dist'), 'datapack-hypixel-uhc'),
 	})
 	.config('operation.build.copyReadme', true)
 	.plugin(pluginRecipe)

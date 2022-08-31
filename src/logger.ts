@@ -43,14 +43,14 @@ export class Logger {
 
 
 	scope(value: string): Logger {
-		return new Logger(this.$namespace, this.$dir, value)
+		return new Logger(value, this.$namespace, this.$dir)
 	}
 
 
 	constructor(
+		scoped?: string,
 		namespace?: string | Array<string>,
 		dir?: string | Array<string>,
-		scoped?: string
 	) {
 		if (namespace) {
 			this.$namespace = typeof namespace === 'string' ? namespace : namespace.join('.')

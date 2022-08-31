@@ -22,7 +22,6 @@ export class Script extends Element {
 	functionDeclarer(id: string, anonymous: boolean = true, source: McfunctionSource): Mcfunction {
 		let func: Mcfunction
 		if (anonymous) {
-
 		} else {
 		}
 		return func
@@ -51,7 +50,7 @@ export class Script extends Element {
 			source = meta.source
 		} else {
 			this.ctx.logger.scope('script-constructor').warn('Script source is empty.')
-			source = '// empty'
+			source = '# empty'
 		}
 
 		this.data = compile(source, compileOptions)

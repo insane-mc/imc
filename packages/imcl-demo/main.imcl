@@ -1,0 +1,4 @@
+namespace imcl {
+	function hello {
+	}
+}
